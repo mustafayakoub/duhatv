@@ -1,0 +1,45 @@
+═══════════════════════════════════════════════════════════════════════
+                    إرشادات الإصلاح السريع
+═══════════════════════════════════════════════════════════════════════
+
+الملف على جهازك قديم ويحتوي على أخطاء. 
+
+⚠️ يجب تحديث هذين السطرين:
+
+════════════════════════════════════════════════════════════════════════
+📝 التعديل 1 - السطر 717:
+════════════════════════════════════════════════════════════════════════
+
+ابحث عن:
+    self.tree_widget.setRightToLeft(True)
+
+استبدل بـ:
+    self.tree_widget.setLayoutDirection(Qt.LayoutDirection.RightToLeft if PYQT_VERSION == 6 else Qt.RightToLeft)
+
+════════════════════════════════════════════════════════════════════════
+📝 التعديل 2 - السطر 849:
+════════════════════════════════════════════════════════════════════════
+
+ابحث عن:
+    self.search_results.setRightToLeft(True)
+
+استبدل بـ:
+    self.search_results.setLayoutDirection(Qt.LayoutDirection.RightToLeft if PYQT_VERSION == 6 else Qt.RightToLeft)
+
+════════════════════════════════════════════════════════════════════════
+🔧 كيفية التعديل في Notepad:
+════════════════════════════════════════════════════════════════════════
+
+1. افتح quran_app_v3_ultimate.py في Notepad
+2. اضغط Ctrl+H (Find & Replace)
+3. في "Find what" اكتب:
+   .setRightToLeft(True)
+
+4. في "Replace with" اكتب:
+   .setLayoutDirection(Qt.LayoutDirection.RightToLeft if PYQT_VERSION == 6 else Qt.RightToLeft)
+
+5. اضغط "Replace All"
+6. احفظ الملف (Ctrl+S)
+7. شغّل التطبيق
+
+════════════════════════════════════════════════════════════════════════
