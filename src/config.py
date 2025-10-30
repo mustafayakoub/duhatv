@@ -227,6 +227,126 @@ TAFSIR_TYPES = {
 DEFAULT_TAFSIR = 'muyassar'
 
 # ═══════════════════════════════════════════════════════════════
+# القراء الصوتيون
+# ═══════════════════════════════════════════════════════════════
+
+RECITERS = {
+    'abdulbasit': {
+        'name': 'عبد الباسط عبد الصمد',
+        'name_en': 'Abdul Basit Abdul Samad',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps',
+        'bitrate': '192kbps',
+        'icon': '🎙️',
+        'popular': True
+    },
+    'minshawy': {
+        'name': 'محمد صديق المنشاوي',
+        'name_en': 'Mohamed Siddiq El-Minshawi',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/MinShawi_Murattal_128kbps',
+        'bitrate': '128kbps',
+        'icon': '🎙️',
+        'popular': True
+    },
+    'maher': {
+        'name': 'ماهر المعيقلي',
+        'name_en': 'Maher Al Muaiqly',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Maher_AlMuaiqly_64kbps',
+        'bitrate': '64kbps',
+        'icon': '🎙️',
+        'popular': True
+    },
+    'sudais': {
+        'name': 'عبد الرحمن السديس',
+        'name_en': 'Abdur-Rahman as-Sudais',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Abdurrahmaan_As-Sudais_64kbps',
+        'bitrate': '64kbps',
+        'icon': '🎙️',
+        'popular': True
+    },
+    'shuraim': {
+        'name': 'سعود الشريم',
+        'name_en': 'Saud ash-Shuraim',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Saood_ash-Shuraym_64kbps',
+        'bitrate': '64kbps',
+        'icon': '🎙️',
+        'popular': True
+    },
+    'alafasy': {
+        'name': 'مشاري راشد العفاسي',
+        'name_en': 'Mishari Rashid al-Afasy',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Alafasy_128kbps',
+        'bitrate': '128kbps',
+        'icon': '🎙️',
+        'popular': True
+    },
+    'ghamadi': {
+        'name': 'سعد الغامدي',
+        'name_en': "Saad al-Ghamidi",
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Ghamadi_40kbps',
+        'bitrate': '40kbps',
+        'icon': '🎙️',
+        'popular': True
+    },
+    'qatami': {
+        'name': 'ناصر القطامي',
+        'name_en': 'Nasser al-Qatami',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Nasser_Alqatami_128kbps',
+        'bitrate': '128kbps',
+        'icon': '🎙️',
+        'popular': True
+    },
+    'husary': {
+        'name': 'محمود خليل الحصري',
+        'name_en': 'Mahmoud Khalil al-Hussary',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Husary_128kbps',
+        'bitrate': '128kbps',
+        'icon': '🎙️',
+        'popular': False
+    },
+    'ajmi': {
+        'name': 'أحمد العجمي',
+        'name_en': 'Ahmed al-Ajmi',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Ahmed_ibn_Ali_al-Ajamy_128kbps',
+        'bitrate': '128kbps',
+        'icon': '🎙️',
+        'popular': False
+    },
+    'juhany': {
+        'name': 'عبد الله الجهني',
+        'name_en': 'Abdullah al-Juhany',
+        'style': 'مرتل',
+        'url_base': 'https://everyayah.com/data/Abdullah_Awad_Al-Juhany_128kbps',
+        'bitrate': '128kbps',
+        'icon': '🎙️',
+        'popular': False
+    },
+}
+
+DEFAULT_RECITER = 'abdulbasit'
+
+# مجلد تخزين الملفات الصوتية
+AUDIO_DIR = DATA_DIR / "audio"
+AUDIO_CACHE_DIR = AUDIO_DIR / "cache"
+
+# إعدادات الصوت
+AUDIO_SETTINGS = {
+    'auto_play_next': True,  # تشغيل الآية التالية تلقائياً
+    'repeat_aya': False,      # تكرار الآية
+    'download_ahead': 3,      # تحميل مسبق لعدد آيات
+    'cache_size_mb': 500,     # حجم الكاش بالميجابايت
+}
+
+# ═══════════════════════════════════════════════════════════════
 # إعدادات البحث
 # ═══════════════════════════════════════════════════════════════
 
@@ -682,7 +802,7 @@ def get_about_text() -> str:
 
 def ensure_directories():
     """التأكد من وجود المجلدات المطلوبة"""
-    for directory in [DATA_DIR, FONTS_DIR, DOCS_DIR, DB_BACKUP_DIR]:
+    for directory in [DATA_DIR, FONTS_DIR, DOCS_DIR, DB_BACKUP_DIR, AUDIO_DIR, AUDIO_CACHE_DIR]:
         directory.mkdir(parents=True, exist_ok=True)
 
 # تنفيذ عند الاستيراد

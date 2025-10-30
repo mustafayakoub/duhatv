@@ -328,5 +328,178 @@ class BookmarksDialog(QDialog):
 
 
 # ═══════════════════════════════════════════════════════════════
+# نافذة اختيار القارئ
+# ═══════════════════════════════════════════════════════════════
+
+class ReciterDialog(QDialog):
+    """نافذة اختيار القارئ"""
+
+    def __init__(self, parent, current_reciter: str):
+        super().__init__(parent)
+        self.current_reciter = current_reciter
+        self.selected_reciter = current_reciter
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle("🎙️ اختيار القارئ")
+        self.setModal(True)
+        self.resize(500, 600)
+
+        layout = QVBoxLayout(self)
+
+        # عنوان
+        title = QLabel("اختر القارئ المفضل:")
+        title.setStyleSheet(f"font-size: 16px; font-weight: bold; color: {COLORS['primary']};")
+        layout.addWidget(title)
+
+        # البحث
+        search_layout = QHBoxLayout()
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("🔍 بحث عن قارئ...")
+        self.search_input.textChanged.connect(self.filter_reciters)
+        search_layout.addWidget(self.search_input)
+        layout.addLayout(search_layout)
+
+        # قائمة القراء
+        self.reciters_list = QListWidget()
+        self.reciters_list.itemDoubleClicked.connect(self.on_reciter_double_clicked)
+        self.populate_reciters()
+        layout.addWidget(self.reciters_list)
+
+        # معلومات القارئ
+        info_group = QGroupBox("📝 معلومات")
+        info_layout = QVBoxLayout()
+
+        self.reciter_name_label = QLabel()
+        self.reciter_name_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        info_layout.addWidget(self.reciter_name_label)
+
+        self.reciter_style_label = QLabel()
+        info_layout.addWidget(self.reciter_style_label)
+
+        self.reciter_bitrate_label = QLabel()
+        info_layout.addWidget(self.reciter_bitrate_label)
+
+        info_group.setLayout(info_layout)
+        layout.addWidget(info_group)
+
+        # الأزرار
+        buttons_layout = QHBoxLayout()
+
+        btn_select = QPushButton("✅ اختيار")
+        btn_select.clicked.connect(self.accept)
+        buttons_layout.addWidget(btn_select)
+
+        btn_cancel = QPushButton("❌ إلغاء")
+        btn_cancel.clicked.connect(self.reject)
+        buttons_layout.addWidget(btn_cancel)
+
+        layout.addLayout(buttons_layout)
+
+        # تحديد القارئ الحالي
+        self.select_current_reciter()
+
+    def populate_reciters(self):
+        """ملء قائمة القراء"""
+        self.reciters_list.clear()
+
+        # القراء المشهورون أولاً
+        popular_reciters = [(rid, rinfo) for rid, rinfo in RECITERS.items() if rinfo.get('popular', False)]
+        other_reciters = [(rid, rinfo) for rid, rinfo in RECITERS.items() if not rinfo.get('popular', False)]
+
+        # إضافة عنوان للمشهورين
+        if popular_reciters:
+            header = QListWidgetItem("⭐ القراء المشهورون")
+            header.setFlags(Qt.ItemFlag.NoItemFlags)
+            header.setBackground(QColor(COLORS['bg_light']))
+            self.reciters_list.addItem(header)
+
+            for reciter_id, reciter_info in popular_reciters:
+                self.add_reciter_item(reciter_id, reciter_info)
+
+        # إضافة عنوان للآخرين
+        if other_reciters:
+            header = QListWidgetItem("📻 قراء آخرون")
+            header.setFlags(Qt.ItemFlag.NoItemFlags)
+            header.setBackground(QColor(COLORS['bg_light']))
+            self.reciters_list.addItem(header)
+
+            for reciter_id, reciter_info in other_reciters:
+                self.add_reciter_item(reciter_id, reciter_info)
+
+    def add_reciter_item(self, reciter_id: str, reciter_info: dict):
+        """إضافة قارئ للقائمة"""
+        item_text = f"{reciter_info['icon']} {reciter_info['name']}"
+        if reciter_info.get('popular'):
+            item_text += " ⭐"
+
+        item = QListWidgetItem(item_text)
+        item.setData(Qt.ItemDataRole.UserRole, reciter_id)
+
+        # تمييز القارئ الحالي
+        if reciter_id == self.current_reciter:
+            item.setBackground(QColor(COLORS['bg_selected']))
+            font = item.font()
+            font.setBold(True)
+            item.setFont(font)
+
+        self.reciters_list.addItem(item)
+
+        # عرض معلومات القارئ عند التحديد
+        if reciter_id == self.current_reciter:
+            self.show_reciter_info(reciter_id)
+
+    def filter_reciters(self, text: str):
+        """تصفية القراء حسب البحث"""
+        for i in range(self.reciters_list.count()):
+            item = self.reciters_list.item(i)
+            reciter_id = item.data(Qt.ItemDataRole.UserRole)
+
+            if reciter_id:  # ليس عنواناً
+                reciter_info = RECITERS.get(reciter_id, {})
+                matches = (
+                    text.lower() in reciter_info.get('name', '').lower() or
+                    text.lower() in reciter_info.get('name_en', '').lower()
+                )
+                item.setHidden(not matches)
+
+    def select_current_reciter(self):
+        """تحديد القارئ الحالي في القائمة"""
+        for i in range(self.reciters_list.count()):
+            item = self.reciters_list.item(i)
+            reciter_id = item.data(Qt.ItemDataRole.UserRole)
+            if reciter_id == self.current_reciter:
+                self.reciters_list.setCurrentItem(item)
+                self.reciters_list.itemClicked.connect(self.on_reciter_clicked)
+                break
+
+    def on_reciter_clicked(self, item):
+        """عند النقر على قارئ"""
+        reciter_id = item.data(Qt.ItemDataRole.UserRole)
+        if reciter_id:
+            self.selected_reciter = reciter_id
+            self.show_reciter_info(reciter_id)
+
+    def on_reciter_double_clicked(self, item):
+        """عند النقر المزدوج على قارئ"""
+        reciter_id = item.data(Qt.ItemDataRole.UserRole)
+        if reciter_id:
+            self.selected_reciter = reciter_id
+            self.accept()
+
+    def show_reciter_info(self, reciter_id: str):
+        """عرض معلومات القارئ"""
+        reciter_info = RECITERS.get(reciter_id, {})
+
+        self.reciter_name_label.setText(f"{reciter_info.get('icon', '🎙️')} {reciter_info.get('name', '')}")
+        self.reciter_style_label.setText(f"📖 النوع: {reciter_info.get('style', 'مرتل')}")
+        self.reciter_bitrate_label.setText(f"🎵 الجودة: {reciter_info.get('bitrate', 'N/A')}")
+
+    def get_selected_reciter(self) -> str:
+        """الحصول على القارئ المختار"""
+        return self.selected_reciter
+
+
+# ═══════════════════════════════════════════════════════════════
 # نهاية الملف
 # ═══════════════════════════════════════════════════════════════
