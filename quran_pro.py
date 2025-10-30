@@ -25,6 +25,9 @@ from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
 
 from config import *
 from db_manager import QuranDatabase
+from audio_player import QuranAudioPlayer
+from audio_widget import AudioControlWidget
+from dialogs import ReciterDialog
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -64,8 +67,14 @@ class QuranProApp(QMainWindow):
         # تحميل الخطوط
         self.load_fonts()
 
+        # مشغل الصوت
+        self.audio_player = QuranAudioPlayer()
+
         # بناء الواجهة
         self.init_ui()
+
+        # ربط إشارات التحكم الصوتي
+        self.connect_audio_signals()
 
         # تحميل الفاتحة
         self.load_sura_aya(1, 1)
@@ -123,6 +132,69 @@ class QuranProApp(QMainWindow):
         x = (screen.width() - self.width()) // 2
         y = (screen.height() - self.height()) // 2
         self.move(x, y)
+
+    # ═══════════════════════════════════════════════════════════════
+    # التحكم الصوتي
+    # ═══════════════════════════════════════════════════════════════
+
+    def connect_audio_signals(self):
+        """ربط إشارات التحكم الصوتي"""
+        # إشارات من عنصر التحكم إلى المشغل
+        self.audio_widget.play_requested.connect(self.on_audio_play_requested)
+        self.audio_widget.pause_requested.connect(self.audio_player.pause)
+        self.audio_widget.stop_requested.connect(self.audio_player.stop)
+        self.audio_widget.next_requested.connect(self.audio_player.play_next)
+        self.audio_widget.previous_requested.connect(self.audio_player.play_previous)
+        self.audio_widget.volume_changed.connect(self.audio_player.set_volume)
+        self.audio_widget.reciter_change_requested.connect(self.on_reciter_change_requested)
+
+        # إشارات من المشغل إلى عنصر التحكم
+        self.audio_player.state_changed.connect(self.on_audio_state_changed)
+        self.audio_player.position_changed.connect(self.audio_widget.set_position)
+        self.audio_player.duration_changed.connect(self.audio_widget.set_duration)
+        self.audio_player.aya_changed.connect(self.on_audio_aya_changed)
+        self.audio_player.error_occurred.connect(self.on_audio_error)
+
+        # تعيين القارئ الافتراضي
+        reciter_name = RECITERS[DEFAULT_RECITER]['name']
+        self.audio_widget.set_reciter_name(reciter_name)
+
+    def on_audio_play_requested(self, sura: int, aya: int):
+        """عند طلب التشغيل"""
+        # إذا كانت القيم 0، نشغل الآية الحالية
+        if sura == 0 or aya == 0:
+            self.audio_player.play_aya(self.current_sura, self.current_aya)
+        else:
+            self.audio_player.play_aya(sura, aya)
+
+    def on_reciter_change_requested(self):
+        """عند طلب تغيير القارئ"""
+        dialog = ReciterDialog(self, self.audio_player.current_reciter)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            reciter_id = dialog.get_selected_reciter()
+            self.audio_player.set_reciter(reciter_id)
+            reciter_name = RECITERS[reciter_id]['name']
+            self.audio_widget.set_reciter_name(reciter_name)
+
+    def on_audio_state_changed(self, state: str):
+        """عند تغيير حالة التشغيل"""
+        is_playing = (state == "playing")
+        self.audio_widget.set_playing_state(is_playing)
+
+        if state == "loading":
+            self.audio_widget.set_status("جاري التحميل...", COLORS['warning'])
+        elif state == "error":
+            self.audio_widget.set_status("خطأ في التشغيل", COLORS['error'])
+
+    def on_audio_aya_changed(self, sura: int, aya: int):
+        """عند تغيير الآية المُشغلة"""
+        # يمكن تحديث العرض أو التمييز
+        if sura != self.current_sura:
+            self.load_sura_aya(sura, aya)
+
+    def on_audio_error(self, error_msg: str):
+        """عند حدوث خطأ صوتي"""
+        self.audio_widget.set_status(error_msg, COLORS['error'])
 
     # ═══════════════════════════════════════════════════════════════
     # القوائم
@@ -547,6 +619,10 @@ class QuranProApp(QMainWindow):
         self.text_browser.customContextMenuRequested.connect(self.show_context_menu)
 
         content_layout.addWidget(self.text_browser)
+
+        # عناصر التحكم الصوتي
+        self.audio_widget = AudioControlWidget()
+        content_layout.addWidget(self.audio_widget)
 
         return content
 
