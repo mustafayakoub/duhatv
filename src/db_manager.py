@@ -51,8 +51,40 @@ class QuranDatabase:
         self.tables = [row[0] for row in self.cursor.fetchall()]
         print(f"📊 عدد الجداول: {len(self.tables)}")
 
+        # البحث عن جدول القرآن (قد يكون اسمه: quran, quran_text, ayat, verses)
+        self.quran_table = None
+        possible_names = ['quran', 'quran_text', 'ayat', 'verses', 'aya', 'mushaf']
+
+        for table_name in possible_names:
+            if table_name in self.tables:
+                # التحقق من أنه يحتوي على أعمدة sura و aya
+                self.cursor.execute(f"PRAGMA table_info({table_name})")
+                columns = [row[1] for row in self.cursor.fetchall()]
+                if any('sura' in col.lower() or 'surah' in col.lower() for col in columns):
+                    self.quran_table = table_name
+                    print(f"✅ تم اكتشاف جدول القرآن: {table_name}")
+                    break
+
+        # إذا لم نجد، نبحث في كل الجداول
+        if not self.quran_table:
+            print("🔍 البحث في كل الجداول...")
+            for table_name in self.tables:
+                self.cursor.execute(f"PRAGMA table_info({table_name})")
+                columns = [row[1].lower() for row in self.cursor.fetchall()]
+                # نبحث عن جدول يحتوي sura+aya أو surah+ayah
+                has_sura = any(col in columns for col in ['sura', 'surah', 'sura_number'])
+                has_aya = any(col in columns for col in ['aya', 'ayah', 'aya_number', 'verse'])
+                if has_sura and has_aya:
+                    self.quran_table = table_name
+                    print(f"✅ تم اكتشاف جدول القرآن: {table_name}")
+                    break
+
+        if not self.quran_table:
+            print("❌ لم يتم العثور على جدول القرآن!")
+            self.quran_table = 'quran'  # نستخدم الافتراضي وسيعطي خطأ واضح
+
         # قراءة أسماء الأعمدة في جدول القرآن
-        self.cursor.execute("PRAGMA table_info(quran)")
+        self.cursor.execute(f"PRAGMA table_info({self.quran_table})")
         self.quran_columns = {row[1]: row[2] for row in self.cursor.fetchall()}
         print(f"📋 أعمدة جدول القرآن: {list(self.quran_columns.keys())}")
 
@@ -137,7 +169,7 @@ class QuranDatabase:
         SELECT
             sura, aya, {rasm_col} as text,
             juz, page, manzil, ruku, hizb_quarter
-        FROM quran
+        FROM {self.quran_table}
         WHERE sura = ? AND aya = ?
         """
 
@@ -168,7 +200,7 @@ class QuranDatabase:
         SELECT
             sura, aya, {rasm_col} as text,
             juz, page, manzil, ruku, hizb_quarter
-        FROM quran
+        FROM {self.quran_table}
         WHERE sura = ?
         ORDER BY aya
         """
@@ -178,9 +210,9 @@ class QuranDatabase:
 
     def get_suras_in_juz(self, juz: int) -> List[Dict[str, Any]]:
         """الحصول على السور في جزء معين"""
-        query = """
+        query = f"""
         SELECT DISTINCT sura
-        FROM quran
+        FROM {self.quran_table}
         WHERE juz = ?
         ORDER BY sura
         """
@@ -190,9 +222,9 @@ class QuranDatabase:
 
     def get_page_ayas(self, page: int) -> List[Dict[str, Any]]:
         """الحصول على آيات صفحة معينة"""
-        query = """
+        query = f"""
         SELECT sura, aya
-        FROM quran
+        FROM {self.quran_table}
         WHERE page = ?
         ORDER BY sura, aya
         """
@@ -292,12 +324,12 @@ class QuranDatabase:
 
         # البحث في القرآن
         if 'quran' in places:
-            sql = """
+            sql = f"""
             SELECT
                 q.sura, q.aya, q.text,
                 s.name_arabic as sura_name,
                 'quran' as source
-            FROM quran q
+            FROM {self.quran_table} q
             JOIN suras s ON q.sura = s.sura
             WHERE q.text LIKE ?
             ORDER BY q.sura, q.aya
@@ -351,14 +383,14 @@ class QuranDatabase:
             # إذا لم يكن هناك جدول morphology، نستخدم البحث النصي
             return self.search_text(root, places)
 
-        query = """
+        query = f"""
         SELECT
             q.sura, q.aya, q.text,
             s.name_arabic as sura_name,
             m.root,
             'root' as source
         FROM morphology m
-        JOIN quran q ON m.sura = q.sura AND m.aya = q.aya
+        JOIN {self.quran_table} q ON m.sura = q.sura AND m.aya = q.aya
         JOIN suras s ON q.sura = s.sura
         WHERE m.root = ?
         ORDER BY q.sura, q.aya
@@ -373,14 +405,14 @@ class QuranDatabase:
         if 'morphology' not in self.tables:
             return self.search_text(pattern, places)
 
-        query = """
+        query = f"""
         SELECT
             q.sura, q.aya, q.text,
             s.name_arabic as sura_name,
             m.pattern,
             'pattern' as source
         FROM morphology m
-        JOIN quran q ON m.sura = q.sura AND m.aya = q.aya
+        JOIN {self.quran_table} q ON m.sura = q.sura AND m.aya = q.aya
         JOIN suras s ON q.sura = s.sura
         WHERE m.pattern LIKE ?
         ORDER BY q.sura, q.aya
@@ -395,14 +427,14 @@ class QuranDatabase:
         if 'topics' not in self.tables:
             return self.search_text(topic, places)
 
-        query = """
+        query = f"""
         SELECT
             q.sura, q.aya, q.text,
             s.name_arabic as sura_name,
             t.topic_name,
             'topic' as source
         FROM topics t
-        JOIN quran q ON t.sura = q.sura AND t.aya = q.aya
+        JOIN {self.quran_table} q ON t.sura = q.sura AND t.aya = q.aya
         JOIN suras s ON q.sura = s.sura
         WHERE t.topic_name LIKE ?
         ORDER BY q.sura, q.aya
@@ -419,14 +451,14 @@ class QuranDatabase:
     def get_sajda_ayas(self) -> List[Dict[str, Any]]:
         """الحصول على آيات السجدة"""
         if 'sajdas' in self.tables:
-            query = """
+            query = f"""
             SELECT
                 s.sura, s.aya, s.type,
                 su.name_arabic as sura_name,
                 q.text
             FROM sajdas s
             JOIN suras su ON s.sura = su.sura
-            JOIN quran q ON s.sura = q.sura AND s.aya = q.aya
+            JOIN {self.quran_table} q ON s.sura = q.sura AND s.aya = q.aya
             ORDER BY s.sura, s.aya
             """
 
@@ -444,15 +476,15 @@ class QuranDatabase:
         stats['suras_count'] = self.cursor.fetchone()[0]
 
         # عدد الآيات
-        self.cursor.execute("SELECT COUNT(*) FROM quran")
+        self.cursor.execute(f"SELECT COUNT(*) FROM {self.quran_table}")
         stats['ayas_count'] = self.cursor.fetchone()[0]
 
         # عدد الأجزاء
-        self.cursor.execute("SELECT MAX(juz) FROM quran")
+        self.cursor.execute(f"SELECT MAX(juz) FROM {self.quran_table}")
         stats['juz_count'] = self.cursor.fetchone()[0]
 
         # عدد الصفحات
-        self.cursor.execute("SELECT MAX(page) FROM quran")
+        self.cursor.execute(f"SELECT MAX(page) FROM {self.quran_table}")
         stats['pages_count'] = self.cursor.fetchone()[0]
 
         return stats
