@@ -788,7 +788,6 @@ class QuranAppFinal(QMainWindow):
         self.search_results.setHeaderLabels(["السورة", "الآية", "النص"])
         self.search_results.setColumnWidth(0, 100)
         self.search_results.setColumnWidth(1, 80)
-        self.search_results.setRightToLeft(True)
 
         if PYQT_VERSION == 6:
             self.search_results.itemClicked.connect(self.on_search_result_clicked)
