@@ -846,7 +846,7 @@ class QuranApp(QMainWindow):
         # نتائج البحث
         self.search_results = QTreeWidget()
         self.search_results.setHeaderLabels(["السورة", "الآية", "النص"])
-        self.search_results.setRightToLeft(True)
+        self.search_results.setLayoutDirection(Qt.LayoutDirection.RightToLeft if PYQT_VERSION == 6 else Qt.RightToLeft)
         layout.addWidget(self.search_results)
 
         return widget
