@@ -631,7 +631,6 @@ class QuranAppFinal(QMainWindow):
         """إنشاء الشجرة الديناميكية"""
         self.tree_widget = QTreeWidget()
         self.tree_widget.setHeaderLabel("📖 القرآن الكريم")
-        self.tree_widget.setRightToLeft(True)
         self.tree_widget.setMinimumWidth(280)
 
         if PYQT_VERSION == 6:
