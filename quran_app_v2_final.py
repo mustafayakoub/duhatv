@@ -109,22 +109,38 @@ class TajweedColors:
 
         import re
 
-        # البحث عن الأنماط مثل <#>text<#>
+        # قائمة بجميع الرموز مرتبة من الأطول للأقصر (لتجنب التداخل)
+        sorted_symbols = sorted(cls.RULES.keys(), key=len, reverse=True)
+
         result = text
 
-        for symbol, info in cls.RULES.items():
-            # تحويل الرمز الخاص إلى pattern آمن
-            escaped_symbol = re.escape(symbol)
+        # استراتيجية جديدة: البحث عن كل رمز بشكل منفصل
+        for symbol in sorted_symbols:
+            info = cls.RULES[symbol]
+            escaped = re.escape(symbol)
 
-            # البحث عن النمط: <symbol>text<symbol>
-            pattern = f"{escaped_symbol}([^<]+?){escaped_symbol}"
+            # نمط 1: <symbol>text<symbol> (نص محاط بالرمز)
+            pattern1 = f"{escaped}([^<>]+?){escaped}"
 
-            # الاستبدال بـ HTML ملون
-            replacement = f'<span style="color: {info["color"]}; font-weight: bold;" title="{info["name"]}">' + r'\1' + '</span>'
+            # نمط 2: <symbol>text (رمز في البداية فقط - حتى نهاية الكلمة)
+            pattern2 = f"{escaped}([^\\s<>]+)"
 
-            result = re.sub(pattern, replacement, result)
+            # جرب النمط الأول
+            matches = list(re.finditer(pattern1, result))
+            if matches:
+                # ابدأ من الآخر لتجنب تغيير المواضع
+                for match in reversed(matches):
+                    colored_text = f'<span style="color: {info["color"]}; font-weight: bold;" title="{info["name"]}">{match.group(1)}</span>'
+                    result = result[:match.start()] + colored_text + result[match.end():]
+            else:
+                # جرب النمط الثاني
+                matches = list(re.finditer(pattern2, result))
+                if matches:
+                    for match in reversed(matches):
+                        colored_text = f'<span style="color: {info["color"]}; font-weight: bold;" title="{info["name"]}">{match.group(1)}</span>'
+                        result = result[:match.start()] + colored_text + result[match.end():]
 
-        # إزالة أي رموز متبقية غير مطابقة
+        # إزالة أي رموز متبقية
         result = re.sub(r'<[#$@|~%^o*+]+>', '', result)
 
         return result
