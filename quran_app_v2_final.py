@@ -7,7 +7,7 @@
 ================================================================================
 
 المطور: Claude AI Assistant
-النسخة: 2.5 Final Edition - دعم جداول متعددة
+النسخة: 2.6 Final Edition - ألوان التجويد
 التاريخ: 2025-10-30
 
 الميزات:
@@ -57,6 +57,77 @@ except ImportError:
         print("قم بتشغيل: pip install PyQt6")
         print("أو: pip install PyQt5")
         sys.exit(1)
+
+
+# ============================================================================
+#                          نظام ألوان التجويد
+# ============================================================================
+
+class TajweedColors:
+    """نظام ألوان أحكام التجويد"""
+
+    # خريطة رموز التجويد والألوان المناسبة
+    RULES = {
+        # الإخفاء - بني فاتح
+        '<#>': {'name': 'إخفاء', 'color': '#D4AF37', 'bg': '#FFF8DC'},
+
+        # الإدغام - أخضر
+        '<$>': {'name': 'إدغام', 'color': '#228B22', 'bg': '#F0FFF0'},
+
+        # القلقلة - أزرق
+        '<@>': {'name': 'قلقلة', 'color': '#4169E1', 'bg': '#F0F8FF'},
+
+        # المد - أحمر
+        '<|>': {'name': 'مد', 'color': '#DC143C', 'bg': '#FFF0F5'},
+        '<||>': {'name': 'مد لازم', 'color': '#B22222', 'bg': '#FFF0F5'},
+        '<|||>': {'name': 'مد متصل', 'color': '#8B0000', 'bg': '#FFF0F5'},
+
+        # الغنة - برتقالي
+        '<~>': {'name': 'غنة', 'color': '#FF8C00', 'bg': '#FFF5EE'},
+
+        # الإقلاب - بنفسجي
+        '<%>': {'name': 'إقلاب', 'color': '#9370DB', 'bg': '#F8F8FF'},
+
+        # الإظهار - رمادي داكن
+        '<^>': {'name': 'إظهار', 'color': '#696969', 'bg': '#F5F5F5'},
+
+        # السكون - أسود
+        '<o>': {'name': 'سكون', 'color': '#2F4F4F', 'bg': '#FFFFFF'},
+
+        # التفخيم - بني غامق
+        '<*>': {'name': 'تفخيم', 'color': '#8B4513', 'bg': '#FFF8DC'},
+
+        # الترقيق - أزرق فاتح
+        '<+>': {'name': 'ترقيق', 'color': '#4682B4', 'bg': '#F0F8FF'},
+    }
+
+    @classmethod
+    def convert_to_html(cls, text: str) -> str:
+        """تحويل النص من رموز التجويد إلى HTML ملون"""
+        if not text:
+            return ""
+
+        import re
+
+        # البحث عن الأنماط مثل <#>text<#>
+        result = text
+
+        for symbol, info in cls.RULES.items():
+            # تحويل الرمز الخاص إلى pattern آمن
+            escaped_symbol = re.escape(symbol)
+
+            # البحث عن النمط: <symbol>text<symbol>
+            pattern = f"{escaped_symbol}([^<]+?){escaped_symbol}"
+
+            # الاستبدال بـ HTML ملون
+            replacement = f'<span style="color: {info["color"]}; font-weight: bold;" title="{info["name"]}">' + r'\1' + '</span>'
+
+            result = re.sub(pattern, replacement, result)
+
+        # إزالة أي رموز متبقية غير مطابقة
+        result = re.sub(r'<[#$@|~%^o*+]+>', '', result)
+
+        return result
 
 
 # ============================================================================
@@ -859,7 +930,7 @@ class QuranAppFinal(QMainWindow):
 
     def init_ui(self):
         """تهيئة الواجهة"""
-        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.5 Final")
+        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.6 Final - ألوان التجويد")
         self.setGeometry(100, 100, 1400, 900)
 
         # تطبيق الألوان
@@ -1399,8 +1470,12 @@ class QuranAppFinal(QMainWindow):
                 verse_id = verse.get(verse_id_col, verse.get('aya_no', '?'))
                 verse_text = verse.get(verse_text_col, verse.get('aya_text', '...'))
 
+                # إزالة رموز التجويد من النص (للشجرة فقط)
+                import re
+                clean_text = re.sub(r'<[#$@|~%^o*+]+>', '', verse_text)
+
                 # اختصار النص
-                short_text = verse_text[:50] + "..." if len(verse_text) > 50 else verse_text
+                short_text = clean_text[:50] + "..." if len(clean_text) > 50 else clean_text
 
                 verse_item = QTreeWidgetItem(item)
                 verse_item.setText(0, f"آية {verse_id}: {short_text}")
@@ -1449,16 +1524,27 @@ class QuranAppFinal(QMainWindow):
         verse_text = verse_data.get(verse_text_col, verse_data.get('aya_text', '...'))
         surah_name = verse_data.get(surah_name_col, verse_data.get('sora_name_ar', f'سورة {surah_id}'))
 
+        # تحويل رموز التجويد إلى ألوان
+        verse_text_colored = TajweedColors.convert_to_html(verse_text)
+
         # تحديث الموضع
         self.lbl_position.setText(f"{surah_name} - الآية {verse_id}")
         self.status_bar.showMessage(f"سورة {surah_name} - الآية {verse_id}")
 
-        # عرض نص القرآن
+        # عرض نص القرآن مع ألوان التجويد
         self.quran_text.setHtml(f"""
             <div style='text-align: center; direction: rtl; padding: 20px;'>
                 <h2 style='color: {ClaudeColors.PRIMARY};'>{surah_name} - الآية {verse_id}</h2>
                 <p style='font-size: 24px; line-height: 2.5; color: {ClaudeColors.TEXT_PRIMARY};'>
-                    {verse_text}
+                    {verse_text_colored}
+                </p>
+                <p style='font-size: 11px; color: {ClaudeColors.TEXT_MUTED}; margin-top: 20px;'>
+                    🎨 الألوان:
+                    <span style='color: #D4AF37;'>■ إخفاء</span> •
+                    <span style='color: #228B22;'>■ إدغام</span> •
+                    <span style='color: #4169E1;'>■ قلقلة</span> •
+                    <span style='color: #DC143C;'>■ مد</span> •
+                    <span style='color: #FF8C00;'>■ غنة</span>
                 </p>
             </div>
         """)
