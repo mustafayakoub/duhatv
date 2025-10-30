@@ -7,7 +7,7 @@
 ================================================================================
 
 المطور: Claude AI Assistant
-النسخة: 2.1 Final Edition - محدث وذكي
+النسخة: 2.2 Final Edition - مع معلومات قاعدة البيانات
 التاريخ: 2025-10-30
 
 الميزات:
@@ -593,7 +593,7 @@ class QuranAppFinal(QMainWindow):
 
     def init_ui(self):
         """تهيئة الواجهة"""
-        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.1 Final")
+        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.2 Final")
         self.setGeometry(100, 100, 1400, 900)
 
         # تطبيق الألوان
@@ -679,9 +679,276 @@ class QuranAppFinal(QMainWindow):
         search_tab = self.create_search_tab()
         self.main_tabs.addTab(search_tab, "🔍 البحث")
 
+        # تاب معلومات قاعدة البيانات
+        db_info_tab = self.create_db_info_tab()
+        self.main_tabs.addTab(db_info_tab, "💾 معلومات قاعدة البيانات")
+
         layout.addWidget(self.main_tabs)
 
         return widget
+
+    def create_db_info_tab(self) -> QWidget:
+        """إنشاء تاب معلومات قاعدة البيانات"""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setSpacing(16)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # عنوان رئيسي
+        title = QLabel("📊 معلومات قاعدة البيانات")
+        title.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {ClaudeColors.PRIMARY}; padding: 10px;")
+        layout.addWidget(title)
+
+        # منطقة قابلة للتمرير
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet(f"border: none; background-color: {ClaudeColors.BG_CONTENT};")
+
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setSpacing(12)
+
+        # معلومات قاعدة البيانات
+        self.db_info_text = QTextEdit()
+        self.db_info_text.setReadOnly(True)
+        self.db_info_text.setFont(QFont("Consolas", 11))
+        self.db_info_text.setMinimumHeight(600)
+
+        content_layout.addWidget(self.db_info_text)
+
+        scroll_area.setWidget(content_widget)
+        layout.addWidget(scroll_area)
+
+        # زر تحديث المعلومات
+        btn_refresh = QPushButton("🔄 تحديث المعلومات")
+        btn_refresh.clicked.connect(self.update_db_info)
+        btn_refresh.setMaximumWidth(200)
+        layout.addWidget(btn_refresh)
+
+        return widget
+
+    def update_db_info(self):
+        """تحديث معلومات قاعدة البيانات"""
+        if not self.db.conn:
+            self.db_info_text.setHtml(f"""
+                <div style='direction: rtl; padding: 20px;'>
+                    <h2 style='color: {ClaudeColors.ERROR};'>❌ لم يتم الاتصال بقاعدة البيانات</h2>
+                    <p>الرجاء التأكد من وجود ملف قاعدة البيانات في المسار الصحيح.</p>
+                </div>
+            """)
+            return
+
+        html = f"""
+        <html dir='rtl'>
+        <head>
+            <style>
+                body {{
+                    font-family: 'Traditional Arabic', 'Segoe UI', sans-serif;
+                    padding: 20px;
+                    background-color: {ClaudeColors.BG_CONTENT};
+                    color: {ClaudeColors.TEXT_PRIMARY};
+                }}
+                h2 {{
+                    color: {ClaudeColors.PRIMARY};
+                    border-bottom: 2px solid {ClaudeColors.BORDER_LIGHT};
+                    padding-bottom: 10px;
+                    margin-top: 20px;
+                }}
+                h3 {{
+                    color: {ClaudeColors.ACCENT};
+                    margin-top: 15px;
+                }}
+                .info-box {{
+                    background-color: {ClaudeColors.BG_SIDEBAR};
+                    border: 1px solid {ClaudeColors.BORDER_LIGHT};
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin: 10px 0;
+                }}
+                .success {{
+                    color: {ClaudeColors.SUCCESS};
+                    font-weight: bold;
+                }}
+                .warning {{
+                    color: {ClaudeColors.WARNING};
+                    font-weight: bold;
+                }}
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 10px 0;
+                    background-color: white;
+                }}
+                th, td {{
+                    border: 1px solid {ClaudeColors.BORDER_LIGHT};
+                    padding: 10px;
+                    text-align: right;
+                }}
+                th {{
+                    background-color: {ClaudeColors.BG_HEADER};
+                    font-weight: bold;
+                    color: {ClaudeColors.TEXT_PRIMARY};
+                }}
+                .column-name {{
+                    font-family: 'Consolas', monospace;
+                    background-color: {ClaudeColors.BG_SIDEBAR};
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                }}
+            </style>
+        </head>
+        <body>
+            <h2>📁 معلومات الملف</h2>
+            <div class='info-box'>
+                <p><strong>مسار قاعدة البيانات:</strong><br/>
+                <span class='column-name'>{self.db.db_path}</span></p>
+                <p><strong>حجم الملف:</strong> {os.path.getsize(self.db.db_path) / (1024*1024):.2f} MB</p>
+                <p><strong>الحالة:</strong> <span class='success'>✅ متصل بنجاح</span></p>
+            </div>
+
+            <h2>🗂️ بنية قاعدة البيانات</h2>
+            <div class='info-box'>
+                <p><strong>الجدول الرئيسي:</strong> <span class='column-name'>{self.db.main_table}</span></p>
+                <p><strong>عدد الجداول:</strong> {len(self.db.tables_info)}</p>
+            </div>
+
+            <h3>📋 الجداول المتوفرة:</h3>
+            <table>
+                <tr>
+                    <th>اسم الجدول</th>
+                    <th>عدد الأعمدة</th>
+                </tr>
+        """
+
+        for table_name, columns in self.db.tables_info.items():
+            html += f"""
+                <tr>
+                    <td><span class='column-name'>{table_name}</span></td>
+                    <td>{len(columns)}</td>
+                </tr>
+            """
+
+        html += """
+            </table>
+
+            <h2>🔍 خريطة الأعمدة المكتشفة</h2>
+            <div class='info-box'>
+                <p>تم اكتشاف <strong>{}</strong> عمود تلقائياً:</p>
+            </div>
+            <table>
+                <tr>
+                    <th>الاسم المنطقي</th>
+                    <th>اسم العمود الفعلي</th>
+                </tr>
+        """.format(len(self.db.column_mappings))
+
+        # ترتيب الأعمدة حسب الأهمية
+        important_columns = [
+            'verse_text', 'verse_text_simple', 'verse_text_tashkil',
+            'surah_id', 'surah_name_ar', 'surah_name_en',
+            'verse_id', 'page', 'juz',
+            'tafseer_moysar', 'tafseer_saadi', 'tafseer_baghawy',
+            'erab'
+        ]
+
+        # الأعمدة المهمة أولاً
+        for logical_name in important_columns:
+            if logical_name in self.db.column_mappings:
+                actual_name = self.db.column_mappings[logical_name]
+                icon = '✅'
+                html += f"""
+                <tr>
+                    <td>{icon} {logical_name}</td>
+                    <td><span class='column-name'>{actual_name}</span></td>
+                </tr>
+                """
+
+        # باقي الأعمدة
+        for logical_name, actual_name in self.db.column_mappings.items():
+            if logical_name not in important_columns:
+                html += f"""
+                <tr>
+                    <td>📌 {logical_name}</td>
+                    <td><span class='column-name'>{actual_name}</span></td>
+                </tr>
+                """
+
+        html += """
+            </table>
+
+            <h2>📊 الإحصائيات</h2>
+            <div class='info-box'>
+        """
+
+        # إحصائيات إضافية
+        try:
+            cursor = self.db.conn.cursor()
+
+            # عدد الآيات
+            if self.db.main_table:
+                cursor.execute(f"SELECT COUNT(*) FROM {self.db.main_table}")
+                total_verses = cursor.fetchone()[0]
+                html += f"<p><strong>إجمالي الآيات:</strong> {total_verses:,} آية</p>"
+
+            # عدد السور
+            html += f"<p><strong>عدد السور:</strong> {len(self.surahs)} سورة</p>"
+
+            # حالة الفهرسة
+            cursor.execute(f"SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='{self.db.main_table}'")
+            indexes = cursor.fetchall()
+            html += f"<p><strong>عدد الفهارس:</strong> {len(indexes)}</p>"
+
+            if len(indexes) > 0:
+                html += "<p><strong>الفهارس المتوفرة:</strong></p><ul>"
+                for idx in indexes:
+                    html += f"<li><span class='column-name'>{idx[0]}</span></li>"
+                html += "</ul>"
+            else:
+                html += f"<p class='warning'>⚠️ لا توجد فهارس - قد يكون البحث بطيئاً</p>"
+                html += "<p>💡 نصيحة: قم بتشغيل <span class='column-name'>create_indexes.py</span> لتحسين الأداء</p>"
+
+        except Exception as e:
+            html += f"<p class='warning'>⚠️ خطأ في الحصول على الإحصائيات: {e}</p>"
+
+        html += """
+            </div>
+
+            <h2>🎯 التفاسير المتوفرة</h2>
+            <div class='info-box'>
+        """
+
+        # التحقق من التفاسير المتوفرة
+        tafaseer_status = []
+        if 'tafseer_moysar' in self.db.column_mappings:
+            tafaseer_status.append("✅ التفسير الميسر")
+        else:
+            tafaseer_status.append("❌ التفسير الميسر")
+
+        if 'tafseer_saadi' in self.db.column_mappings:
+            tafaseer_status.append("✅ تفسير السعدي")
+        else:
+            tafaseer_status.append("❌ تفسير السعدي")
+
+        if 'tafseer_baghawy' in self.db.column_mappings:
+            tafaseer_status.append("✅ تفسير البغوي")
+        else:
+            tafaseer_status.append("❌ تفسير البغوي")
+
+        for status in tafaseer_status:
+            html += f"<p>{status}</p>"
+
+        html += """
+            </div>
+
+            <hr style='margin: 30px 0; border: 1px solid {}'>
+            <p style='text-align: center; color: {}; font-size: 12px;'>
+                تم إنشاء هذا التقرير تلقائياً • النسخة 2.2 Final
+            </p>
+        </body>
+        </html>
+        """.format(ClaudeColors.BORDER_LIGHT, ClaudeColors.TEXT_MUTED)
+
+        self.db_info_text.setHtml(html)
 
     def create_browse_tab(self) -> QWidget:
         """إنشاء تاب التصفح"""
@@ -822,6 +1089,9 @@ class QuranAppFinal(QMainWindow):
         # تحميل السور
         self.load_surahs()
         self.status_bar.showMessage(f"✅ تم تحميل {len(self.surahs)} سورة")
+
+        # تحديث معلومات قاعدة البيانات
+        self.update_db_info()
 
     def load_surahs(self):
         """تحميل السور في الشجرة"""
