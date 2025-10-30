@@ -17,6 +17,7 @@ Quran Components Library - Reusable Modular Components
 5. QuranAudioComponent - مشغل الصوت
 6. QuranBookmarksComponent - الإشارات المرجعية
 7. QuranThemeComponent - المظاهر والثيمات
+8. QuranTajweedComponent - ألوان وأحكام التجويد 🎨
 
 ═══════════════════════════════════════════════════════════════
 🏢 AiGrow | 👨‍💻 Mustafa Yakoub
@@ -34,7 +35,8 @@ __all__ = [
     'QuranDisplayComponent',
     'QuranAudioComponent',
     'QuranBookmarksComponent',
-    'QuranThemeComponent'
+    'QuranThemeComponent',
+    'QuranTajweedComponent'
 ]
 
 # ═══════════════════════════════════════════════════════════════
@@ -48,6 +50,7 @@ from .components.display import QuranDisplayComponent
 from .components.audio import QuranAudioComponent
 from .components.bookmarks import QuranBookmarksComponent
 from .components.theme import QuranThemeComponent
+from .components.tajweed import QuranTajweedComponent, TajweedRule
 
 # ═══════════════════════════════════════════════════════════════
 # Configuration
