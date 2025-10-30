@@ -7,7 +7,7 @@
 ================================================================================
 
 المطور: Claude AI Assistant
-النسخة: 2.3 Final Edition - اكتشاف ذكي محسّن
+النسخة: 2.4 Final Edition - دعم surahNo و ayahNo
 التاريخ: 2025-10-30
 
 الميزات:
@@ -408,7 +408,12 @@ class DatabaseManager:
                             self.column_mappings['verse_text'] = col
                         elif 'verse_text' in col_lower:
                             self.column_mappings['verse_text'] = col
-                        elif col_lower == 'text' or col_lower == 'ayah' or col_lower == 'aya':
+                        elif 'tajweed' in col_lower and 'text' in col_lower:
+                            self.column_mappings['verse_text'] = col
+                        elif col_lower == 'text' or col_lower == 'tajweedtext':
+                            if 'verse_text' not in self.column_mappings:
+                                self.column_mappings['verse_text'] = col
+                        elif col_lower == 'ayah' or col_lower == 'aya':
                             if 'verse_text' not in self.column_mappings:
                                 self.column_mappings['verse_text'] = col
 
@@ -425,7 +430,7 @@ class DatabaseManager:
                             self.column_mappings['verse_text_tashkil'] = col
 
                         # أعمدة السورة - أنماط متعددة
-                        elif col_lower in ['sora', 'surah', 'sura', 'sorah', 'surah_id', 'sora_id']:
+                        elif col_lower in ['sora', 'surah', 'sura', 'sorah', 'surah_id', 'sora_id', 'surahno', 'sura_no']:
                             self.column_mappings['surah_id'] = col
                         elif 'sora_name_ar' in col_lower or 'surah_name_ar' in col_lower:
                             self.column_mappings['surah_name_ar'] = col
@@ -436,7 +441,7 @@ class DatabaseManager:
                                 self.column_mappings['surah_name_ar'] = col
 
                         # أعمدة الآية - أنماط متعددة
-                        elif col_lower in ['aya_no', 'ayah_no', 'aya', 'ayah', 'verse_no', 'verse', 'ayah_number', 'aya_number']:
+                        elif col_lower in ['aya_no', 'ayah_no', 'aya', 'ayah', 'verse_no', 'verse', 'ayah_number', 'aya_number', 'ayahno', 'ayah_no']:
                             self.column_mappings['verse_id'] = col
 
                         # أعمدة إضافية
@@ -454,6 +459,29 @@ class DatabaseManager:
                             self.column_mappings['tafseer_saadi'] = col
                         elif ('tafseer_bughiu' in col_lower or 'tafsir_baghawy' in col_lower or 'baghawi' in col_lower or 'baghawy' in col_lower) and 'tafseer_baghawy' not in self.column_mappings:
                             self.column_mappings['tafseer_baghawy'] = col
+
+                    break
+
+        # بحث خاص عن جداول معروفة
+        if not self.main_table:
+            # البحث عن quran_text_with_tajweed أو جداول مشابهة
+            for table_name, columns in self.tables_info.items():
+                if 'quran_text' in table_name.lower() or 'tajweed' in table_name.lower():
+                    print(f"✅ تم العثور على جدول نصوص: {table_name}")
+                    print(f"📋 الأعمدة: {', '.join(columns)}")
+                    self.main_table = table_name
+
+                    for col in columns:
+                        col_lower = col.lower()
+
+                        if 'surah' in col_lower and 'surah_id' not in self.column_mappings:
+                            self.column_mappings['surah_id'] = col
+                        if 'ayah' in col_lower and 'text' not in col_lower and 'verse_id' not in self.column_mappings:
+                            self.column_mappings['verse_id'] = col
+                        if 'tajweed' in col_lower or col_lower == 'text':
+                            self.column_mappings['verse_text'] = col
+                        if 'page' in col_lower and 'page' not in self.column_mappings:
+                            self.column_mappings['page'] = col
 
                     break
 
@@ -481,16 +509,16 @@ class DatabaseManager:
                                 self.column_mappings['verse_text'] = col
 
                         # رقم السورة
-                        if ('sora' in col_lower or 'surah' in col_lower) and 'name' not in col_lower and 'surah_id' not in self.column_mappings:
+                        if ('sora' in col_lower or 'surah' in col_lower or 'sura' in col_lower) and 'name' not in col_lower and 'surah_id' not in self.column_mappings:
                             self.column_mappings['surah_id'] = col
 
                         # اسم السورة
-                        if ('sora' in col_lower or 'surah' in col_lower) and 'name' in col_lower and 'surah_name_ar' not in self.column_mappings:
+                        if ('sora' in col_lower or 'surah' in col_lower or 'sura' in col_lower) and 'name' in col_lower and 'surah_name_ar' not in self.column_mappings:
                             self.column_mappings['surah_name_ar'] = col
 
                         # رقم الآية
-                        if ('aya' in col_lower or 'ayah' in col_lower or 'verse' in col_lower) and 'no' not in col_lower and 'verse_id' not in self.column_mappings:
-                            if col_lower in ['aya', 'ayah', 'verse', 'aya_no', 'ayah_no', 'verse_no']:
+                        if ('aya' in col_lower or 'ayah' in col_lower or 'verse' in col_lower) and 'verse_id' not in self.column_mappings:
+                            if col_lower in ['aya', 'ayah', 'verse', 'aya_no', 'ayah_no', 'verse_no', 'ayahno', 'surahno']:
                                 self.column_mappings['verse_id'] = col
 
                     break
@@ -501,20 +529,85 @@ class DatabaseManager:
 
     def get_surahs(self) -> List[Dict[str, Any]]:
         """الحصول على قائمة السور"""
-        if not self.conn or not self.main_table:
+        if not self.conn:
             return []
 
         try:
             cursor = self.conn.cursor()
 
-            surah_id_col = self.column_mappings.get('surah_id', 'sora')
-            surah_name_col = self.column_mappings.get('surah_name_ar', 'sora_name_ar')
+            # محاولة استخدام جدول خاص بالسور (مثل SurahMatrix أو surah_content)
+            surah_tables = ['SurahMatrix', 'surah_content', 'surah_stats']
+            for table in surah_tables:
+                if table in self.tables_info:
+                    print(f"📖 استخدام جدول السور: {table}")
+                    cols = self.tables_info[table]
 
-            query = f"""
-                SELECT DISTINCT {surah_id_col}, {surah_name_col}
-                FROM {self.main_table}
-                ORDER BY {surah_id_col}
-            """
+                    # البحث عن أعمدة رقم واسم السورة
+                    surah_no_col = None
+                    for col in cols:
+                        if 'surah' in col.lower() and 'no' in col.lower():
+                            surah_no_col = col
+                            break
+
+                    if not surah_no_col:
+                        surah_no_col = 'surahNo' if 'surahNo' in cols else cols[0]
+
+                    # جلب السور
+                    query = f"SELECT DISTINCT {surah_no_col} FROM {table} ORDER BY {surah_no_col}"
+                    cursor.execute(query)
+                    rows = cursor.fetchall()
+
+                    # أسماء السور الافتراضية
+                    surah_names = [
+                        "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف",
+                        "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر",
+                        "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون",
+                        "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم",
+                        "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص",
+                        "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف",
+                        "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر",
+                        "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف",
+                        "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم",
+                        "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان",
+                        "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الإنفطار", "المطففين",
+                        "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد",
+                        "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة",
+                        "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل",
+                        "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص",
+                        "الفلق", "الناس"
+                    ]
+
+                    surahs = []
+                    for row in rows:
+                        surah_id = row[0]
+                        surah_name = surah_names[surah_id - 1] if 1 <= surah_id <= 114 else f"سورة {surah_id}"
+                        surahs.append({
+                            'id': surah_id,
+                            'name': surah_name
+                        })
+
+                    print(f"✅ تم تحميل {len(surahs)} سورة")
+                    return surahs
+
+            # إذا لم نجد جدول خاص، استخدم الجدول الرئيسي
+            if not self.main_table:
+                return []
+
+            surah_id_col = self.column_mappings.get('surah_id', 'surahNo')
+            surah_name_col = self.column_mappings.get('surah_name_ar', None)
+
+            if surah_name_col:
+                query = f"""
+                    SELECT DISTINCT {surah_id_col}, {surah_name_col}
+                    FROM {self.main_table}
+                    ORDER BY {surah_id_col}
+                """
+            else:
+                query = f"""
+                    SELECT DISTINCT {surah_id_col}
+                    FROM {self.main_table}
+                    ORDER BY {surah_id_col}
+                """
 
             cursor.execute(query)
             rows = cursor.fetchall()
@@ -523,7 +616,7 @@ class DatabaseManager:
             for row in rows:
                 surahs.append({
                     'id': row[0],
-                    'name': row[1] if len(row) > 1 else f"سورة {row[0]}"
+                    'name': row[1] if len(row) > 1 and row[1] else f"سورة {row[0]}"
                 })
 
             print(f"✅ تم تحميل {len(surahs)} سورة")
@@ -531,6 +624,8 @@ class DatabaseManager:
 
         except Exception as e:
             print(f"خطأ في الحصول على السور: {e}")
+            import traceback
+            traceback.print_exc()
             return []
 
     def get_verses_by_surah(self, surah_id: int) -> List[Dict[str, Any]]:
@@ -652,7 +747,7 @@ class QuranAppFinal(QMainWindow):
 
     def init_ui(self):
         """تهيئة الواجهة"""
-        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.3 Final")
+        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.4 Final")
         self.setGeometry(100, 100, 1400, 900)
 
         # تطبيق الألوان
