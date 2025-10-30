@@ -714,7 +714,7 @@ class QuranApp(QMainWindow):
         """إنشاء شجرة السور والآيات"""
         self.tree_widget = QTreeWidget()
         self.tree_widget.setHeaderLabel("القرآن الكريم")
-        self.tree_widget.setRightToLeft(True)
+        self.tree_widget.setLayoutDirection(Qt.LayoutDirection.RightToLeft if PYQT_VERSION == 6 else Qt.RightToLeft)
         self.tree_widget.setFont(QFont("Arial", 11))
 
     def create_content_widget(self) -> QWidget:
