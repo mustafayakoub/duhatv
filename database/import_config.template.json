@@ -1,0 +1,148 @@
+{
+  "_comment": "ملف تكوين استيراد البيانات من SQLite إلى PostgreSQL",
+  "_usage": "انسخ هذا الملف إلى import_config.json وعدّل الإعدادات",
+
+  "sqlite": {
+    "database_path": "/path/to/your/quran.db",
+    "encoding": "UTF-8"
+  },
+
+  "postgresql": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "quran_hierarchical_db",
+    "user": "postgres",
+    "password": ""
+  },
+
+  "import_options": {
+    "batch_size": 100,
+    "show_progress": true,
+    "skip_existing": true,
+    "validate_data": true
+  },
+
+  "table_mappings": {
+    "surahs": {
+      "enabled": true,
+      "source_table": "suras",
+      "column_mapping": {
+        "sura": "sur_id",
+        "name_arabic": "sur_name_ar",
+        "name_english": "sur_name_en",
+        "ayas_count": "sur_ayah_count",
+        "revelation_type": "sur_revelation_type"
+      },
+      "defaults": {
+        "sur_revelation_type": "meccan"
+      }
+    },
+
+    "ayahs": {
+      "enabled": true,
+      "source_table": "quran",
+      "column_mapping": {
+        "sura": "aya_sur_id",
+        "aya": "aya_number",
+        "text_uthmani": "aya_text_uthmani",
+        "text_simple": "aya_text_simple",
+        "juz": "aya_juz",
+        "page": "aya_page",
+        "hizb": "aya_hizb",
+        "manzil": "aya_manzil",
+        "ruku": "aya_ruku"
+      },
+      "auto_generate": {
+        "aya_global_id": "sequential"
+      }
+    },
+
+    "words": {
+      "enabled": false,
+      "source_table": "words",
+      "column_mapping": {
+        "sura": "wrd_sur_id",
+        "aya": "wrd_aya_number",
+        "word_position": "wrd_position",
+        "word_text": "wrd_text_uthmani",
+        "root": "wrd_root",
+        "pattern": "wrd_pattern"
+      }
+    },
+
+    "translations": {
+      "enabled": false,
+      "source_table": "translations",
+      "column_mapping": {
+        "sura": "tra_sur_id",
+        "aya": "tra_aya_number",
+        "text": "tra_text",
+        "language": "tra_language_code",
+        "translator_id": "tra_translator_id"
+      }
+    },
+
+    "tafsir": {
+      "enabled": false,
+      "source_table": "tafsir",
+      "column_mapping": {
+        "sura": "taf_sur_id",
+        "aya": "taf_aya_number",
+        "text": "taf_text",
+        "mufassir_id": "taf_mufassir_id"
+      }
+    },
+
+    "reciters": {
+      "enabled": false,
+      "source_table": "reciters",
+      "column_mapping": {
+        "id": "rec_id",
+        "name_ar": "rec_name_ar",
+        "name_en": "rec_name_en"
+      }
+    },
+
+    "recitations": {
+      "enabled": false,
+      "source_table": "recitations",
+      "column_mapping": {
+        "sura": "rct_sur_id",
+        "aya": "rct_aya_number",
+        "reciter_id": "rct_reciter_id",
+        "audio_url": "rct_url",
+        "duration": "rct_duration_seconds"
+      }
+    }
+  },
+
+  "data_transformations": {
+    "revelation_type": {
+      "مكية": "meccan",
+      "مدنية": "medinan",
+      "Meccan": "meccan",
+      "Medinan": "medinan",
+      "مكي": "meccan",
+      "مدني": "medinan"
+    },
+
+    "language_codes": {
+      "ar": "ara",
+      "en": "eng",
+      "arabic": "ara",
+      "english": "eng"
+    }
+  },
+
+  "validation_rules": {
+    "surahs": {
+      "sur_id": {"min": 1, "max": 114, "required": true},
+      "sur_ayah_count": {"min": 1, "required": true}
+    },
+    "ayahs": {
+      "aya_sur_id": {"min": 1, "max": 114, "required": true},
+      "aya_number": {"min": 1, "required": true},
+      "aya_text_uthmani": {"min_length": 1, "required": true}
+    }
+  }
+}
