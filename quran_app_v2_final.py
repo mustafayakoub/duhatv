@@ -7,7 +7,7 @@
 ================================================================================
 
 المطور: Claude AI Assistant
-النسخة: 2.6 Final Edition - ألوان التجويد
+النسخة: 2.7 Final Edition - ألوان التجويد المحسّنة
 التاريخ: 2025-10-30
 
 الميزات:
@@ -66,82 +66,56 @@ except ImportError:
 class TajweedColors:
     """نظام ألوان أحكام التجويد"""
 
-    # خريطة رموز التجويد والألوان المناسبة
+    # خريطة أرقام التجويد والألوان المناسبة
+    # النظام المستخدم في قاعدة البيانات: <number>text</number>
     RULES = {
-        # الإخفاء - بني فاتح
-        '<#>': {'name': 'إخفاء', 'color': '#D4AF37', 'bg': '#FFF8DC'},
-
-        # الإدغام - أخضر
-        '<$>': {'name': 'إدغام', 'color': '#228B22', 'bg': '#F0FFF0'},
-
-        # القلقلة - أزرق
-        '<@>': {'name': 'قلقلة', 'color': '#4169E1', 'bg': '#F0F8FF'},
-
-        # المد - أحمر
-        '<|>': {'name': 'مد', 'color': '#DC143C', 'bg': '#FFF0F5'},
-        '<||>': {'name': 'مد لازم', 'color': '#B22222', 'bg': '#FFF0F5'},
-        '<|||>': {'name': 'مد متصل', 'color': '#8B0000', 'bg': '#FFF0F5'},
-
-        # الغنة - برتقالي
-        '<~>': {'name': 'غنة', 'color': '#FF8C00', 'bg': '#FFF5EE'},
-
-        # الإقلاب - بنفسجي
-        '<%>': {'name': 'إقلاب', 'color': '#9370DB', 'bg': '#F8F8FF'},
-
-        # الإظهار - رمادي داكن
-        '<^>': {'name': 'إظهار', 'color': '#696969', 'bg': '#F5F5F5'},
-
-        # السكون - أسود
-        '<o>': {'name': 'سكون', 'color': '#2F4F4F', 'bg': '#FFFFFF'},
-
-        # التفخيم - بني غامق
-        '<*>': {'name': 'تفخيم', 'color': '#8B4513', 'bg': '#FFF8DC'},
-
-        # الترقيق - أزرق فاتح
-        '<+>': {'name': 'ترقيق', 'color': '#4682B4', 'bg': '#F0F8FF'},
+        '1': {'name': 'إظهار', 'color': '#696969'},      # رمادي
+        '2': {'name': 'إدغام', 'color': '#228B22'},      # أخضر
+        '3': {'name': 'إدغام بغنة', 'color': '#2E8B57'}, # أخضر داكن
+        '4': {'name': 'مد', 'color': '#DC143C'},          # أحمر
+        '5': {'name': 'قلقلة', 'color': '#4169E1'},      # أزرق
+        '6': {'name': 'سكون', 'color': '#2F4F4F'},       # رمادي غامق
+        '7': {'name': 'غنة', 'color': '#FF8C00'},        # برتقالي
+        '8': {'name': 'شدة', 'color': '#8B0000'},        # أحمر غامق
+        '9': {'name': 'إقلاب', 'color': '#9370DB'},      # بنفسجي
+        '10': {'name': 'تفخيم', 'color': '#8B4513'},     # بني
+        '11': {'name': 'ترقيق', 'color': '#4682B4'},     # أزرق فاتح
+        '12': {'name': 'إخفاء', 'color': '#D4AF37'},     # ذهبي
+        '13': {'name': 'صفير', 'color': '#20B2AA'},      # فيروزي
+        '14': {'name': 'لين', 'color': '#DDA0DD'},       # بنفسجي فاتح
+        '15': {'name': 'مد لازم', 'color': '#B22222'},   # أحمر داكن
     }
 
     @classmethod
     def convert_to_html(cls, text: str) -> str:
-        """تحويل النص من رموز التجويد إلى HTML ملون"""
+        """تحويل النص من رموز التجويد الرقمية إلى HTML ملون"""
         if not text:
             return ""
 
         import re
 
-        # قائمة بجميع الرموز مرتبة من الأطول للأقصر (لتجنب التداخل)
-        sorted_symbols = sorted(cls.RULES.keys(), key=len, reverse=True)
+        # نمط XML: <number>text</number>
+        # مثال: <1>ٱ</1> أو <12>نّ</12>
 
         result = text
 
-        # استراتيجية جديدة: البحث عن كل رمز بشكل منفصل
-        for symbol in sorted_symbols:
-            info = cls.RULES[symbol]
-            escaped = re.escape(symbol)
+        # البحث عن جميع الأنماط <number>...</number>
+        pattern = r'<(\d+)>([^<]+?)</\1>'
 
-            # نمط 1: <symbol>text<symbol> (نص محاط بالرمز)
-            pattern1 = f"{escaped}([^<>]+?){escaped}"
+        def replace_match(match):
+            """استبدال كل match بنص ملون"""
+            number = match.group(1)
+            content = match.group(2)
 
-            # نمط 2: <symbol>text (رمز في البداية فقط - حتى نهاية الكلمة)
-            pattern2 = f"{escaped}([^\\s<>]+)"
-
-            # جرب النمط الأول
-            matches = list(re.finditer(pattern1, result))
-            if matches:
-                # ابدأ من الآخر لتجنب تغيير المواضع
-                for match in reversed(matches):
-                    colored_text = f'<span style="color: {info["color"]}; font-weight: bold;" title="{info["name"]}">{match.group(1)}</span>'
-                    result = result[:match.start()] + colored_text + result[match.end():]
+            if number in cls.RULES:
+                info = cls.RULES[number]
+                return f'<span style="color: {info["color"]}; font-weight: bold;" title="{info["name"]}">{content}</span>'
             else:
-                # جرب النمط الثاني
-                matches = list(re.finditer(pattern2, result))
-                if matches:
-                    for match in reversed(matches):
-                        colored_text = f'<span style="color: {info["color"]}; font-weight: bold;" title="{info["name"]}">{match.group(1)}</span>'
-                        result = result[:match.start()] + colored_text + result[match.end():]
+                # رقم غير معروف، أرجع النص بدون تلوين
+                return content
 
-        # إزالة أي رموز متبقية
-        result = re.sub(r'<[#$@|~%^o*+]+>', '', result)
+        # استبدال جميع الأنماط
+        result = re.sub(pattern, replace_match, result)
 
         return result
 
@@ -946,7 +920,7 @@ class QuranAppFinal(QMainWindow):
 
     def init_ui(self):
         """تهيئة الواجهة"""
-        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.6 Final - ألوان التجويد")
+        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.7 Final - ألوان التجويد")
         self.setGeometry(100, 100, 1400, 900)
 
         # تطبيق الألوان
@@ -1488,7 +1462,10 @@ class QuranAppFinal(QMainWindow):
 
                 # إزالة رموز التجويد من النص (للشجرة فقط)
                 import re
-                clean_text = re.sub(r'<[#$@|~%^o*+]+>', '', verse_text)
+                # إزالة الأنماط <number>text</number>
+                clean_text = re.sub(r'<\d+>([^<]+?)</\d+>', r'\1', verse_text)
+                # إزالة أي رموز متبقية
+                clean_text = re.sub(r'</?[#$@|~%^o*+\d]+>', '', clean_text)
 
                 # اختصار النص
                 short_text = clean_text[:50] + "..." if len(clean_text) > 50 else clean_text
@@ -1554,13 +1531,15 @@ class QuranAppFinal(QMainWindow):
                 <p style='font-size: 24px; line-height: 2.5; color: {ClaudeColors.TEXT_PRIMARY};'>
                     {verse_text_colored}
                 </p>
-                <p style='font-size: 11px; color: {ClaudeColors.TEXT_MUTED}; margin-top: 20px;'>
-                    🎨 الألوان:
-                    <span style='color: #D4AF37;'>■ إخفاء</span> •
-                    <span style='color: #228B22;'>■ إدغام</span> •
-                    <span style='color: #4169E1;'>■ قلقلة</span> •
-                    <span style='color: #DC143C;'>■ مد</span> •
-                    <span style='color: #FF8C00;'>■ غنة</span>
+                <p style='font-size: 10px; color: {ClaudeColors.TEXT_MUTED}; margin-top: 15px; line-height: 1.6;'>
+                    🎨 مفتاح الألوان:
+                    <span style='color: #696969;'>⬛ إظهار</span> •
+                    <span style='color: #228B22;'>⬛ إدغام</span> •
+                    <span style='color: #4169E1;'>⬛ قلقلة</span> •
+                    <span style='color: #DC143C;'>⬛ مد</span> •
+                    <span style='color: #FF8C00;'>⬛ غنة</span> •
+                    <span style='color: #9370DB;'>⬛ إقلاب</span> •
+                    <span style='color: #D4AF37;'>⬛ إخفاء</span>
                 </p>
             </div>
         """)
