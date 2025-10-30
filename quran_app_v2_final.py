@@ -423,79 +423,79 @@ class DatabaseManager:
                     continue
 
                 if 'quran' in table_name.lower() or 'aya' in table_name.lower() or 'ayah' in table_name.lower():
-                # التحقق من وجود أعمدة مهمة
-                has_text = any('text' in col.lower() or 'aya' in col.lower() or 'ayah' in col.lower() for col in columns)
-                has_sora = any('sora' in col.lower() or 'surah' in col.lower() for col in columns)
+                    # التحقق من وجود أعمدة مهمة
+                    has_text = any('text' in col.lower() or 'aya' in col.lower() or 'ayah' in col.lower() for col in columns)
+                    has_sora = any('sora' in col.lower() or 'surah' in col.lower() for col in columns)
 
-                if has_text and has_sora:
-                    self.main_table = table_name
-                    print(f"✅ الجدول الرئيسي: {table_name}")
-                    print(f"📋 الأعمدة المتوفرة: {', '.join(columns[:10])}{'...' if len(columns) > 10 else ''}")
+                    if has_text and has_sora:
+                        self.main_table = table_name
+                        print(f"✅ الجدول الرئيسي: {table_name}")
+                        print(f"📋 الأعمدة المتوفرة: {', '.join(columns[:10])}{'...' if len(columns) > 10 else ''}")
 
-                    # رسم خريطة الأعمدة - محسّن
-                    for col in columns:
-                        col_lower = col.lower()
+                        # رسم خريطة الأعمدة - محسّن
+                        for col in columns:
+                            col_lower = col.lower()
 
-                        # أعمدة النص - أنماط متعددة
-                        if 'aya_text' in col_lower and 'emlaey' not in col_lower and 'tashkil' not in col_lower:
-                            self.column_mappings['verse_text'] = col
-                        elif 'ayah_text' in col_lower and 'emlaey' not in col_lower and 'tashkil' not in col_lower:
-                            self.column_mappings['verse_text'] = col
-                        elif 'verse_text' in col_lower:
-                            self.column_mappings['verse_text'] = col
-                        elif 'tajweed' in col_lower and 'text' in col_lower:
-                            self.column_mappings['verse_text'] = col
-                        elif col_lower == 'text' or col_lower == 'tajweedtext':
-                            if 'verse_text' not in self.column_mappings:
+                            # أعمدة النص - أنماط متعددة
+                            if 'aya_text' in col_lower and 'emlaey' not in col_lower and 'tashkil' not in col_lower:
                                 self.column_mappings['verse_text'] = col
-                        elif col_lower == 'ayah' or col_lower == 'aya':
-                            if 'verse_text' not in self.column_mappings:
+                            elif 'ayah_text' in col_lower and 'emlaey' not in col_lower and 'tashkil' not in col_lower:
                                 self.column_mappings['verse_text'] = col
+                            elif 'verse_text' in col_lower:
+                                self.column_mappings['verse_text'] = col
+                            elif 'tajweed' in col_lower and 'text' in col_lower:
+                                self.column_mappings['verse_text'] = col
+                            elif col_lower == 'text' or col_lower == 'tajweedtext':
+                                if 'verse_text' not in self.column_mappings:
+                                    self.column_mappings['verse_text'] = col
+                            elif col_lower == 'ayah' or col_lower == 'aya':
+                                if 'verse_text' not in self.column_mappings:
+                                    self.column_mappings['verse_text'] = col
 
-                        # نص بسيط
-                        elif 'aya_text_emlaey' in col_lower or 'ayah_text_emlaey' in col_lower:
-                            self.column_mappings['verse_text_simple'] = col
-                        elif 'emlaey' in col_lower or 'simple' in col_lower:
-                            self.column_mappings['verse_text_simple'] = col
+                            # نص بسيط
+                            elif 'aya_text_emlaey' in col_lower or 'ayah_text_emlaey' in col_lower:
+                                self.column_mappings['verse_text_simple'] = col
+                            elif 'emlaey' in col_lower or 'simple' in col_lower:
+                                self.column_mappings['verse_text_simple'] = col
 
-                        # نص بالتشكيل
-                        elif 'aya_text_tashkil' in col_lower or 'ayah_text_tashkil' in col_lower:
-                            self.column_mappings['verse_text_tashkil'] = col
-                        elif 'tashkil' in col_lower or 'tashkeel' in col_lower:
-                            self.column_mappings['verse_text_tashkil'] = col
+                            # نص بالتشكيل
+                            elif 'aya_text_tashkil' in col_lower or 'ayah_text_tashkil' in col_lower:
+                                self.column_mappings['verse_text_tashkil'] = col
+                            elif 'tashkil' in col_lower or 'tashkeel' in col_lower:
+                                self.column_mappings['verse_text_tashkil'] = col
 
-                        # أعمدة السورة - أنماط متعددة
-                        elif col_lower in ['sora', 'surah', 'sura', 'sorah', 'surah_id', 'sora_id', 'surahno', 'sura_no']:
-                            self.column_mappings['surah_id'] = col
-                        elif 'sora_name_ar' in col_lower or 'surah_name_ar' in col_lower:
-                            self.column_mappings['surah_name_ar'] = col
-                        elif 'sora_name_en' in col_lower or 'surah_name_en' in col_lower:
-                            self.column_mappings['surah_name_en'] = col
-                        elif 'sora_name' in col_lower or 'surah_name' in col_lower:
-                            if 'surah_name_ar' not in self.column_mappings:
+                            # أعمدة السورة - أنماط متعددة
+                            elif col_lower in ['sora', 'surah', 'sura', 'sorah', 'surah_id', 'sora_id', 'surahno', 'sura_no']:
+                                self.column_mappings['surah_id'] = col
+                            elif 'sora_name_ar' in col_lower or 'surah_name_ar' in col_lower:
                                 self.column_mappings['surah_name_ar'] = col
+                            elif 'sora_name_en' in col_lower or 'surah_name_en' in col_lower:
+                                self.column_mappings['surah_name_en'] = col
+                            elif 'sora_name' in col_lower or 'surah_name' in col_lower:
+                                if 'surah_name_ar' not in self.column_mappings:
+                                    self.column_mappings['surah_name_ar'] = col
 
-                        # أعمدة الآية - أنماط متعددة
-                        elif col_lower in ['aya_no', 'ayah_no', 'aya', 'ayah', 'verse_no', 'verse', 'ayah_number', 'aya_number', 'ayahno', 'ayah_no']:
-                            self.column_mappings['verse_id'] = col
+                            # أعمدة الآية - أنماط متعددة
+                            elif col_lower in ['aya_no', 'ayah_no', 'aya', 'ayah', 'verse_no', 'verse', 'ayah_number', 'aya_number', 'ayahno', 'ayah_no']:
+                                self.column_mappings['verse_id'] = col
 
-                        # أعمدة إضافية
-                        elif 'page' in col_lower and 'page' not in self.column_mappings:
-                            self.column_mappings['page'] = col
-                        elif ('jozz' in col_lower or 'juz' in col_lower) and 'juz' not in self.column_mappings:
-                            self.column_mappings['juz'] = col
-                        elif ('earab' in col_lower or 'erab' in col_lower or 'i3rab' in col_lower or 'irab' in col_lower) and 'erab' not in self.column_mappings:
-                            self.column_mappings['erab'] = col
+                            # أعمدة إضافية
+                            elif 'page' in col_lower and 'page' not in self.column_mappings:
+                                self.column_mappings['page'] = col
+                            elif ('jozz' in col_lower or 'juz' in col_lower) and 'juz' not in self.column_mappings:
+                                self.column_mappings['juz'] = col
+                            elif ('earab' in col_lower or 'erab' in col_lower or 'i3rab' in col_lower or 'irab' in col_lower) and 'erab' not in self.column_mappings:
+                                self.column_mappings['erab'] = col
 
-                        # التفاسير
-                        elif ('tafseer_moysar' in col_lower or 'tafsir_moysar' in col_lower or 'moyasar' in col_lower) and 'tafseer_moysar' not in self.column_mappings:
-                            self.column_mappings['tafseer_moysar'] = col
-                        elif ('tafseer_saadi' in col_lower or 'tafsir_saadi' in col_lower or 'saadi' in col_lower) and 'tafseer_saadi' not in self.column_mappings:
-                            self.column_mappings['tafseer_saadi'] = col
-                        elif ('tafseer_bughiu' in col_lower or 'tafsir_baghawy' in col_lower or 'baghawi' in col_lower or 'baghawy' in col_lower) and 'tafseer_baghawy' not in self.column_mappings:
-                            self.column_mappings['tafseer_baghawy'] = col
+                            # التفاسير
+                            elif ('tafseer_moysar' in col_lower or 'tafsir_moysar' in col_lower or 'moyasar' in col_lower) and 'tafseer_moysar' not in self.column_mappings:
+                                self.column_mappings['tafseer_moysar'] = col
+                            elif ('tafseer_saadi' in col_lower or 'tafsir_saadi' in col_lower or 'saadi' in col_lower) and 'tafseer_saadi' not in self.column_mappings:
+                                self.column_mappings['tafseer_saadi'] = col
+                            elif ('tafseer_bughiu' in col_lower or 'tafsir_baghawy' in col_lower or 'baghawi' in col_lower or 'baghawy' in col_lower) and 'tafseer_baghawy' not in self.column_mappings:
+                                self.column_mappings['tafseer_baghawy'] = col
 
-                    break
+                        break
 
         # ثالثاً: بحث خاص عن جداول معروفة (إذا لم نجد بعد)
         if not self.main_table or 'verse_text' not in self.column_mappings:
