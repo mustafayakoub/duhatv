@@ -7,7 +7,7 @@
 ================================================================================
 
 المطور: Claude AI Assistant
-النسخة: 2.4 Final Edition - دعم surahNo و ayahNo
+النسخة: 2.5 Final Edition - دعم جداول متعددة
 التاريخ: 2025-10-30
 
 الميزات:
@@ -385,9 +385,44 @@ class DatabaseManager:
 
     def _detect_column_mappings(self):
         """اكتشاف أسماء الأعمدة الفعلية - محسّن"""
-        # البحث عن الجدول الرئيسي
-        for table_name, columns in self.tables_info.items():
-            if 'quran' in table_name.lower() or 'aya' in table_name.lower() or 'ayah' in table_name.lower():
+
+        # أولاً: البحث عن جداول النصوص المفضلة (أولوية عالية)
+        priority_tables = ['quran_text_with_tajweed', 'quran_text', 'ayah_text', 'verses']
+        for priority_table in priority_tables:
+            for table_name, columns in self.tables_info.items():
+                if priority_table in table_name.lower():
+                    print(f"✅ تم العثور على جدول نصوص ذو أولوية: {table_name}")
+                    print(f"📋 الأعمدة: {', '.join(columns)}")
+                    self.main_table = table_name
+
+                    for col in columns:
+                        col_lower = col.lower()
+
+                        if 'surah' in col_lower and 'surah_id' not in self.column_mappings:
+                            self.column_mappings['surah_id'] = col
+                        if 'ayah' in col_lower and 'text' not in col_lower and 'verse_id' not in self.column_mappings:
+                            self.column_mappings['verse_id'] = col
+                        if 'tajweed' in col_lower or (col_lower == 'text' and 'verse_text' not in self.column_mappings):
+                            self.column_mappings['verse_text'] = col
+                        if 'page' in col_lower and 'page' not in self.column_mappings:
+                            self.column_mappings['page'] = col
+
+                    # إذا وجدنا نص الآيات، نكمل
+                    if 'verse_text' in self.column_mappings:
+                        print(f"✅ تم العثور على عمود النص: {self.column_mappings['verse_text']}")
+                        break
+
+            if self.main_table and 'verse_text' in self.column_mappings:
+                break
+
+        # ثانياً: البحث العادي في جداول quran/aya/ayah (إذا لم نجد جدول مفضل)
+        if not self.main_table or 'verse_text' not in self.column_mappings:
+            for table_name, columns in self.tables_info.items():
+                # تجاهل جداول الإعراب والتفسير والمحتوى الثانوي
+                if any(x in table_name.lower() for x in ['irab', 'content', 'timing', 'coordinate', 'summary']):
+                    continue
+
+                if 'quran' in table_name.lower() or 'aya' in table_name.lower() or 'ayah' in table_name.lower():
                 # التحقق من وجود أعمدة مهمة
                 has_text = any('text' in col.lower() or 'aya' in col.lower() or 'ayah' in col.lower() for col in columns)
                 has_sora = any('sora' in col.lower() or 'surah' in col.lower() for col in columns)
@@ -462,8 +497,8 @@ class DatabaseManager:
 
                     break
 
-        # بحث خاص عن جداول معروفة
-        if not self.main_table:
+        # ثالثاً: بحث خاص عن جداول معروفة (إذا لم نجد بعد)
+        if not self.main_table or 'verse_text' not in self.column_mappings:
             # البحث عن quran_text_with_tajweed أو جداول مشابهة
             for table_name, columns in self.tables_info.items():
                 if 'quran_text' in table_name.lower() or 'tajweed' in table_name.lower():
@@ -523,7 +558,39 @@ class DatabaseManager:
 
                     break
 
-        print(f"✅ تم اكتشاف {len(self.column_mappings)} عمود")
+        # رابعاً: البحث عن جداول التفاسير المنفصلة
+        tafseer_tables = {
+            'tafsir_moyassar': 'tafseer_moysar',
+            'tafsir_saadi': 'tafseer_saadi',
+            'tafsir_baghawy': 'tafseer_baghawy',
+            'tafsir_katheer': 'tafseer_katheer',
+            'tafsir_tabary': 'tafseer_tabary'
+        }
+
+        for table_name, mapping_key in tafseer_tables.items():
+            if table_name in self.tables_info and mapping_key not in self.column_mappings:
+                # البحث عن عمود التفسير في هذا الجدول
+                cols = self.tables_info[table_name]
+                for col in cols:
+                    if 'tafs' in col.lower() or col.lower() == 'text':
+                        self.column_mappings[mapping_key] = f"{table_name}.{col}"
+                        print(f"📚 تم العثور على تفسير: {mapping_key} في {table_name}")
+                        break
+
+        # البحث عن جدول الإعراب إذا لم يكن موجوداً
+        if 'erab' not in self.column_mappings:
+            for table_name in ['ayah_content_irab', 'word_content_irab', 'irab']:
+                if table_name in self.tables_info:
+                    cols = self.tables_info[table_name]
+                    for col in cols:
+                        if 'irab' in col.lower() or 'erab' in col.lower():
+                            self.column_mappings['erab'] = f"{table_name}.{col}"
+                            print(f"📝 تم العثور على الإعراب في {table_name}")
+                            break
+                    if 'erab' in self.column_mappings:
+                        break
+
+        print(f"\n✅ تم اكتشاف {len(self.column_mappings)} عمود")
         for key, value in self.column_mappings.items():
             print(f"   {key} → {value}")
 
@@ -657,16 +724,17 @@ class DatabaseManager:
             return []
 
     def get_verse_data(self, surah_id: int, verse_id: int) -> Optional[Dict[str, Any]]:
-        """الحصول على بيانات آية محددة"""
+        """الحصول على بيانات آية محددة من جداول متعددة"""
         if not self.conn or not self.main_table:
             return None
 
         try:
             cursor = self.conn.cursor()
 
-            surah_id_col = self.column_mappings.get('surah_id', 'sora')
-            verse_id_col = self.column_mappings.get('verse_id', 'aya_no')
+            surah_id_col = self.column_mappings.get('surah_id', 'surahNo')
+            verse_id_col = self.column_mappings.get('verse_id', 'ayahNo')
 
+            # جلب البيانات من الجدول الرئيسي
             query = f"""
                 SELECT *
                 FROM {self.main_table}
@@ -676,12 +744,56 @@ class DatabaseManager:
             cursor.execute(query, (surah_id, verse_id))
             row = cursor.fetchone()
 
-            if row:
-                return dict(row)
-            return None
+            if not row:
+                return None
+
+            result = dict(row)
+
+            # جلب التفاسير من جداول منفصلة
+            tafseer_tables = {
+                'tafseer_moysar': 'tafsir_moyassar',
+                'tafseer_saadi': 'tafsir_saadi',
+                'tafseer_baghawy': 'tafsir_baghawy',
+                'tafseer_katheer': 'tafsir_katheer'
+            }
+
+            for key, table_name in tafseer_tables.items():
+                if table_name in self.tables_info and key not in result:
+                    try:
+                        cols = self.tables_info[table_name]
+                        # البحث عن أعمدة السورة والآية
+                        sura_col = next((c for c in cols if 'sura' in c.lower() or 'surah' in c.lower()), 'sura')
+                        aya_col = next((c for c in cols if 'aya' in c.lower() or 'ayah' in c.lower()), 'aya')
+                        tafsir_col = next((c for c in cols if 'tafs' in c.lower()), 'tafsir')
+
+                        tafsir_query = f"SELECT {tafsir_col} FROM {table_name} WHERE {sura_col} = ? AND {aya_col} = ?"
+                        cursor.execute(tafsir_query, (surah_id, verse_id))
+                        tafsir_row = cursor.fetchone()
+                        if tafsir_row:
+                            result[key] = tafsir_row[0]
+                    except Exception as e:
+                        print(f"تحذير: لم يتم جلب {key}: {e}")
+
+            # جلب الإعراب من جدول منفصل
+            if 'erab' not in result and 'ayah_content_irab' in self.tables_info:
+                try:
+                    cursor.execute(
+                        "SELECT irabAyah1 FROM ayah_content_irab WHERE surahNo = ? AND ayahNo = ?",
+                        (surah_id, verse_id)
+                    )
+                    irab_row = cursor.fetchone()
+                    if irab_row:
+                        result['erab'] = irab_row[0]
+                        result['irabAyah1'] = irab_row[0]
+                except Exception as e:
+                    print(f"تحذير: لم يتم جلب الإعراب: {e}")
+
+            return result
 
         except Exception as e:
             print(f"خطأ في الحصول على بيانات الآية: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def search_text(self, text: str, limit: int = 1000) -> List[Dict[str, Any]]:
@@ -747,7 +859,7 @@ class QuranAppFinal(QMainWindow):
 
     def init_ui(self):
         """تهيئة الواجهة"""
-        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.4 Final")
+        self.setWindowTitle("تطبيق القرآن الكريم الاحترافي 2.5 Final")
         self.setGeometry(100, 100, 1400, 900)
 
         # تطبيق الألوان
