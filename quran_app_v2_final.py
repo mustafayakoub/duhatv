@@ -318,14 +318,22 @@ class DatabaseManager:
     def find_database(self) -> Optional[str]:
         """البحث الذكي عن قاعدة البيانات"""
         possible_paths = [
+            # المسار الأساسي الجديد
+            r"C:\quran9\quran_ultimate_final.db",
+            r"C:\quran9\quran.db",
+            # المسارات القديمة
             r"C:\QYRAN5\QYRAN62\surah_database_app_v32.db",
             r"C:\QYRAN5\QYRAN62\quran.db",
             r"C:\QYRAN5\surah_database_app_v32.db",
             r"C:\QYRAN5\quran.db",
+            # المسارات المحلية
+            "quran_ultimate_final.db",
             "surah_database_app_v32.db",
             "quran.db",
+            "./quran_ultimate_final.db",
             "./surah_database_app_v32.db",
             "./quran.db",
+            "../quran_ultimate_final.db",
             "../surah_database_app_v32.db",
             "../quran.db",
         ]
@@ -813,7 +821,7 @@ class QuranAppFinal(QMainWindow):
                 "خطأ",
                 "لم يتم العثور على قاعدة البيانات!\n\n"
                 "الرجاء وضع ملف قاعدة البيانات في:\n"
-                "C:\\QYRAN5\\QYRAN62\\\n\n"
+                "C:\\quran9\\quran_ultimate_final.db\n\n"
                 "أو في نفس مجلد التطبيق."
             )
             self.status_bar.showMessage("خطأ: لم يتم العثور على قاعدة البيانات")
