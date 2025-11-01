@@ -1,5 +1,3 @@
-version: '3.8'
-
 # ═══════════════════════════════════════════════════════════════════════════
 # Quran Modern Stack - Docker Compose Configuration
 # نظام قرآني متكامل بثلاث لغات برمجية
@@ -115,75 +113,51 @@ services:
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Go Search Microservice
+  # قريباً - Coming Soon
   # ═══════════════════════════════════════════════════════════════════════════
-  search-service-go:
-    build:
-      context: ./services-go/search-service
-      dockerfile: Dockerfile
-    container_name: quran-search-go
-    restart: unless-stopped
-
-    environment:
-      # Database
-      DATABASE_URL: postgresql://quran:quran_secure_pass_2025@postgres:5432/quran_db
-
-      # Redis
-      REDIS_URL: redis://:redis_secure_pass_2025@redis:6379
-
-      # Server
-      PORT: 8001
-      GO_ENV: production
-
-    ports:
-      - "8001:8001"
-
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-    networks:
-      - quran-network
-
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # search-service-go:
+  #   build:
+  #     context: ./services-go/search-service
+  #     dockerfile: Dockerfile
+  #   container_name: quran-search-go
+  #   restart: unless-stopped
+  #   environment:
+  #     DATABASE_URL: postgresql://quran:quran_secure_pass_2025@postgres:5432/quran_db
+  #     REDIS_URL: redis://:redis_secure_pass_2025@redis:6379
+  #     PORT: 8001
+  #     GO_ENV: production
+  #   ports:
+  #     - "8001:8001"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - quran-network
 
   # ═══════════════════════════════════════════════════════════════════════════
   # TypeScript Frontend (React + Vite)
+  # قريباً - Coming Soon
   # ═══════════════════════════════════════════════════════════════════════════
-  frontend:
-    build:
-      context: ./frontend-ts
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: http://localhost:8000
-        VITE_SEARCH_API_URL: http://localhost:8001
-    container_name: quran-frontend
-    restart: unless-stopped
-
-    environment:
-      VITE_API_URL: http://localhost:8000
-      VITE_SEARCH_API_URL: http://localhost:8001
-
-    ports:
-      - "3000:80"
-
-    depends_on:
-      - backend-rust
-      - search-service-go
-
-    networks:
-      - quran-network
-
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # frontend:
+  #   build:
+  #     context: ./frontend-ts
+  #     dockerfile: Dockerfile
+  #     args:
+  #       VITE_API_URL: http://localhost:8000
+  #       VITE_SEARCH_API_URL: http://localhost:8001
+  #   container_name: quran-frontend
+  #   restart: unless-stopped
+  #   environment:
+  #     VITE_API_URL: http://localhost:8000
+  #     VITE_SEARCH_API_URL: http://localhost:8001
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - backend-rust
+  #   networks:
+  #     - quran-network
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Migration Service (Python)
