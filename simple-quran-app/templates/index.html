@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>القرآن الكريم - تطبيق ويب بسيط</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #764ba2;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .status-item {
+            display: inline-block;
+            margin: 0 15px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .status-ok {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            text-align: right;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        .search-results {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .search-result-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+        }
+
+        .surahs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .surah-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .surah-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .surah-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .surah-name-ar {
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .surah-name-en {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .surah-type {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .makkiyah {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .madaniyah {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .no-data {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌙 القرآن الكريم</h1>
+            <p class="subtitle">تطبيق ويب بسيط لعرض البيانات من ثلاث قواعد بيانات</p>
+        </header>
+
+        <div class="status-bar">
+            <strong>📊 حالة قواعد البيانات:</strong>
+            <span class="status-item {% if dbs_status.db1 %}status-ok{% else %}status-error{% endif %}">
+                DB1 (الترجمات): {% if dbs_status.db1 %}✅ متصل{% else %}❌ غير متصل{% endif %}
+            </span>
+            <span class="status-item {% if dbs_status.db2 %}status-ok{% else %}status-error{% endif %}">
+                DB2 (الإعراب): {% if dbs_status.db2 %}✅ متصل{% else %}❌ غير متصل{% endif %}
+            </span>
+            <span class="status-item {% if dbs_status.db3 %}status-ok{% else %}status-error{% endif %}">
+                DB3 (المحتوى): {% if dbs_status.db3 %}✅ متصل{% else %}❌ غير متصل{% endif %}
+            </span>
+        </div>
+
+        <div class="search-box">
+            <input type="text"
+                   class="search-input"
+                   id="searchInput"
+                   placeholder="🔍 ابحث في القرآن الكريم..."
+                   onkeyup="search()">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+
+        {% if surahs %}
+        <div class="surahs-grid">
+            {% for surah in surahs %}
+            <a href="/surah/{{ surah.surah_id }}" class="surah-card">
+                <div class="surah-number">{{ surah.surah_id }}</div>
+                <div class="surah-name-ar">{{ surah.name_ar }}</div>
+                <div class="surah-name-en">{{ surah.name_en }}</div>
+                <span class="surah-type {% if surah.revelation_type == 'Makkiyah' %}makkiyah{% else %}madaniyah{% endif %}">
+                    {{ surah.revelation_type }}
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-data">
+            <h2>⚠️ لا توجد بيانات</h2>
+            <p>تأكد من وجود قواعد البيانات في المسار: C:\quran11\</p>
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>© 2025 - تطبيق القرآن الكريم البسيط | مشروع مفتوح المصدر</p>
+        </footer>
+    </div>
+
+    <script>
+        let searchTimeout;
+
+        function search() {
+            clearTimeout(searchTimeout);
+            const query = document.getElementById('searchInput').value.trim();
+            const resultsDiv = document.getElementById('searchResults');
+
+            if (query.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                resultsDiv.innerHTML = '<div class="loading">⏳ جارٍ البحث...</div>';
+                resultsDiv.style.display = 'block';
+
+                fetch(`/api/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.results && data.results.length > 0) {
+                            let html = `<h3>🔍 النتائج (${data.count}):</h3>`;
+                            data.results.forEach(result => {
+                                html += `
+                                    <div class="search-result-item">
+                                        <strong>${result.surah_name} - آية ${result.ayah_number}</strong><br>
+                                        <p>${result.text}</p>
+                                    </div>
+                                `;
+                            });
+                            resultsDiv.innerHTML = html;
+                        } else {
+                            resultsDiv.innerHTML = '<p style="text-align:center;">❌ لا توجد نتائج</p>';
+                        }
+                    })
+                    .catch(error => {
+                        resultsDiv.innerHTML = '<p style="text-align:center; color:red;">❌ خطأ في البحث</p>';
+                    });
+            }, 500);
+        }
+    </script>
+</body>
+</html>

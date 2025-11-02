@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if surah_info %}{{ surah_info.name_ar }}{% else %}سورة{% endif %} - القرآن الكريم</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Traditional Arabic', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: white;
+            color: #764ba2;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-button:hover {
+            background: #f8f9fa;
+        }
+
+        .surah-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .surah-name {
+            font-size: 2.5em;
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+
+        .surah-info {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: #f8f9fa;
+            color: #666;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .ayah-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .ayah-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .ayah-text {
+            font-size: 1.8em;
+            line-height: 2;
+            color: #333;
+            font-family: 'Traditional Arabic', serif;
+            text-align: justify;
+            margin-top: 15px;
+        }
+
+        .translation-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-right: 4px solid #667eea;
+        }
+
+        .translation-header {
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+
+        .translation-text {
+            color: #555;
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+
+        .irab-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .word-analysis {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-right: 3px solid #667eea;
+        }
+
+        .word-text {
+            font-size: 1.5em;
+            color: #764ba2;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .analysis-row {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .no-data {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            color: #721c24;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-button">⬅ العودة للقائمة</a>
+
+        {% if surah_info %}
+        <div class="surah-header">
+            <div class="surah-name">{{ surah_info.name_ar }}</div>
+            <div class="surah-info">
+                {{ surah_info.name_en }} |
+                {{ surah_info.revelation_type }} |
+                {% if surah_info.ayah_count %}{{ surah_info.ayah_count }} آية{% endif %}
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('quran')">📖 النص القرآني</button>
+            <button class="tab-button" onclick="showTab('translation')">🌐 الترجمات</button>
+            <button class="tab-button" onclick="showTab('irab')">📚 الإعراب والصرف</button>
+        </div>
+
+        <!-- تبويب النص القرآني -->
+        <div id="quran" class="tab-content active">
+            {% if ayahs %}
+                {% for ayah in ayahs %}
+                <div class="ayah-card">
+                    <span class="ayah-number">{{ ayah.ayah_number }}</span>
+                    <div class="ayah-text">{{ ayah.text }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-data">
+                    <p>⚠️ لا توجد آيات لهذه السورة في قاعدة البيانات</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- تبويب الترجمات -->
+        <div id="translation" class="tab-content">
+            {% if translations %}
+                {% set current_verse = 0 %}
+                {% for trans in translations %}
+                    {% if trans.verse_number != current_verse %}
+                        {% set current_verse = trans.verse_number %}
+                        <h3 style="color: white; margin: 20px 0 10px;">آية {{ trans.verse_number }}</h3>
+                    {% endif %}
+                    <div class="translation-card">
+                        <div class="translation-header">🌐 {{ trans.language_name }}</div>
+                        <div class="translation-text">{{ trans.text }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-data">
+                    <p>⚠️ لا توجد ترجمات متاحة لهذه السورة</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- تبويب الإعراب والصرف -->
+        <div id="irab" class="tab-content">
+            {% if irab_data %}
+                {% set current_ayah = 0 %}
+                {% for word in irab_data %}
+                    {% if word.ayah_number != current_ayah %}
+                        {% set current_ayah = word.ayah_number %}
+                        <h3 style="color: white; margin: 20px 0 10px;">آية {{ word.ayah_number }}</h3>
+                    {% endif %}
+                    <div class="word-analysis">
+                        <div class="word-text">{{ word.word_text }}</div>
+                        {% if word.irab %}
+                        <div class="analysis-row"><strong>الإعراب:</strong> {{ word.irab }}</div>
+                        {% endif %}
+                        {% if word.sarf %}
+                        <div class="analysis-row"><strong>الصرف:</strong> {{ word.sarf }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-data">
+                    <p>⚠️ لا توجد بيانات إعراب متاحة لهذه السورة</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {% else %}
+        <div class="no-data">
+            <h2>⚠️ لم يتم العثور على السورة</h2>
+            <p>تأكد من وجود قواعد البيانات في المسار الصحيح</p>
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>© 2025 - تطبيق القرآن الكريم البسيط</p>
+        </footer>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // إخفاء كل التبويبات
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // إزالة التنشيط من كل الأزرار
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // تفعيل التبويب المحدد
+            document.getElementById(tabName).classList.add('active');
+
+            // تفعيل الزر المحدد
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
