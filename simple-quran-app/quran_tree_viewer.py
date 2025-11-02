@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ════════════════════════════════════════════════════════════════════════════
-عارض القرآن الشجري - Quran Tree Viewer
+عارض القرآن الشجري المحسّن - Enhanced Quran Tree Viewer
 تطبيق ويب تفاعلي لعرض القرآن الكريم مع الإعراب والصرف
 ════════════════════════════════════════════════════════════════════════════
 """
@@ -102,11 +102,53 @@ def get_ayahs(surah_id):
 
 @app.route('/api/ayah/<int:ayah_id>/words')
 def get_words(ayah_id):
-    """جلب كلمات آية معينة"""
+    """جلب كلمات آية معينة مع الترتيب"""
     try:
         conn = get_db()
         cursor = conn.cursor()
 
+        # الحصول على معلومات الآية أولاً
+        cursor.execute("""
+            SELECT surah_id, ayah_number
+            FROM ayahs
+            WHERE ayah_id = ?
+        """, (ayah_id,))
+
+        ayah_info = cursor.fetchone()
+        if not ayah_info:
+            return jsonify({'success': False, 'error': 'Ayah not found'}), 404
+
+        surah_id = ayah_info['surah_id']
+        ayah_number = ayah_info['ayah_number']
+
+        # حساب الترتيب في السورة
+        cursor.execute("""
+            SELECT COUNT(*) as position_in_surah
+            FROM words w
+            JOIN ayahs a ON w.ayah_id = a.ayah_id
+            WHERE a.surah_id = ? AND (
+                a.ayah_number < ? OR
+                (a.ayah_number = ? AND w.word_position < (
+                    SELECT word_position FROM words WHERE ayah_id = ? LIMIT 1
+                ))
+            )
+        """, (surah_id, ayah_number, ayah_number, ayah_id))
+
+        base_position_in_surah = cursor.fetchone()['position_in_surah']
+
+        # حساب الترتيب في المصحف
+        cursor.execute("""
+            SELECT COUNT(*) as position_in_quran
+            FROM words w
+            JOIN ayahs a ON w.ayah_id = a.ayah_id
+            WHERE a.surah_id < ? OR (
+                a.surah_id = ? AND a.ayah_number < ?
+            )
+        """, (surah_id, surah_id, ayah_number))
+
+        base_position_in_quran = cursor.fetchone()['position_in_quran']
+
+        # جلب الكلمات
         cursor.execute("""
             SELECT
                 w.word_id,
@@ -123,7 +165,13 @@ def get_words(ayah_id):
             ORDER BY w.word_position
         """, (ayah_id,))
 
-        words = [dict(row) for row in cursor.fetchall()]
+        words = []
+        for idx, row in enumerate(cursor.fetchall()):
+            word_dict = dict(row)
+            word_dict['position_in_surah'] = base_position_in_surah + idx + 1
+            word_dict['position_in_quran'] = base_position_in_quran + idx + 1
+            words.append(word_dict)
+
         conn.close()
 
         return jsonify({
@@ -184,7 +232,7 @@ def get_stats():
 
 @app.route('/api/search')
 def search():
-    """البحث في القرآن"""
+    """البحث في القرآن - محسّن"""
     query = request.args.get('q', '').strip()
 
     if len(query) < 2:
@@ -204,7 +252,9 @@ def search():
                 a.ayah_number,
                 a.text_uthmani,
                 s.surah_id,
-                s.name_arabic
+                s.name_arabic,
+                a.juz_number,
+                a.page_number
             FROM ayahs a
             JOIN surahs s ON a.surah_id = s.surah_id
             WHERE a.text_uthmani LIKE ?
@@ -231,7 +281,8 @@ def search():
 if __name__ == '__main__':
     print()
     print("═" * 70)
-    print("  🌙 عارض القرآن الشجري - Quran Tree Viewer")
+    print("  🌙 عارض القرآن الشجري المحسّن")
+    print("  Enhanced Quran Tree Viewer")
     print("═" * 70)
     print()
     print("📊 قاعدة البيانات:", DB_PATH)

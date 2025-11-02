@@ -165,106 +165,155 @@
             overflow-y: auto;
         }
 
-        .ayah-item {
-            margin: 20px 0;
-            padding: 20px;
+        /* نمط الآية الجديد - سطر واحد */
+        .ayah-line {
+            margin: 15px 0;
+            padding: 15px;
             background: #f8f9fa;
-            border-radius: 10px;
-            border-right: 4px solid #667eea;
+            border-radius: 8px;
+            border-right: 3px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .ayah-header {
+        .ayah-line:hover {
+            background: #e9ecef;
+            transform: translateX(-3px);
+        }
+
+        .ayah-text-inline {
+            font-size: 1.5em;
+            line-height: 1.8;
+            color: #2c3e50;
+            display: inline;
+        }
+
+        .ayah-number-inline {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Modal للكلمات */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
         }
 
-        .ayah-number {
-            background: #667eea;
+        .close {
             color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
+            font-size: 35px;
             font-weight: bold;
-        }
-
-        .ayah-text {
-            font-size: 1.8em;
-            line-height: 2.2;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-
-        .words-container {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px dashed #dee2e6;
-        }
-
-        .word-item {
-            display: inline-block;
-            margin: 10px;
-            padding: 15px;
-            background: white;
-            border: 2px solid #667eea;
-            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s;
-            position: relative;
+            line-height: 1;
         }
 
-        .word-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-            border-color: #764ba2;
+        .close:hover {
+            transform: rotate(90deg);
         }
 
-        .word-text {
-            font-size: 1.5em;
-            color: #2c3e50;
-            margin-bottom: 5px;
+        .modal-body {
+            padding: 30px;
         }
 
-        .word-details {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 10px;
-            padding: 15px;
-            background: white;
+        .word-card {
+            background: #f8f9fa;
             border: 2px solid #667eea;
             border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 1000;
-            min-width: 300px;
-            max-width: 400px;
+            padding: 20px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .word-item:hover .word-details {
-            display: block;
+        .word-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .detail-section {
-            margin: 10px 0;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-
-        .detail-label {
+        .word-title {
+            font-size: 2em;
             font-weight: bold;
             color: #667eea;
-            display: block;
-            margin-bottom: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba220 100%);
+            border-radius: 8px;
         }
 
-        .detail-text {
+        .word-info-line {
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 5px;
+            border-right: 3px solid #667eea;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .word-info-label {
+            font-weight: bold;
+            color: #667eea;
+            display: inline-block;
+            min-width: 180px;
+        }
+
+        .word-info-value {
             color: #495057;
-            line-height: 1.6;
         }
 
         .loading {
@@ -325,21 +374,6 @@
             background: #764ba2;
         }
 
-        .toggle-words-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s;
-        }
-
-        .toggle-words-btn:hover {
-            background: #764ba2;
-        }
-
         .search-results {
             margin-top: 20px;
         }
@@ -357,6 +391,18 @@
         .search-result-item:hover {
             background: #e9ecef;
             transform: translateX(-5px);
+        }
+
+        .search-result-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -420,7 +466,23 @@
         </div>
     </div>
 
+    <!-- Modal للكلمات -->
+    <div id="wordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">تفاصيل الكلمة</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- سيتم ملؤه بالمحتوى -->
+            </div>
+        </div>
+    </div>
+
     <script>
+        let currentSurahId = null;
+        let currentSurahName = null;
+
         // تحميل الإحصائيات
         async function loadStats() {
             try {
@@ -452,6 +514,7 @@
                     data.data.forEach(surah => {
                         const item = document.createElement('div');
                         item.className = 'surah-item';
+                        item.dataset.surahId = surah.surah_id;
                         item.innerHTML = `
                             <span class="surah-number">${surah.surah_id}</span>
                             <strong>${surah.name_arabic}</strong>
@@ -470,9 +533,16 @@
 
         // تحميل آيات سورة
         async function loadAyahs(surahId, surahName) {
+            currentSurahId = surahId;
+            currentSurahName = surahName;
+
             // تحديث الحالة النشطة
-            document.querySelectorAll('.surah-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.surah-item').forEach(item => {
+                item.classList.remove('active');
+                if (parseInt(item.dataset.surahId) === surahId) {
+                    item.classList.add('active');
+                }
+            });
 
             const detailsContent = document.getElementById('detailsContent');
             detailsContent.innerHTML = '<div class="loading">جاري تحميل الآيات</div>';
@@ -484,22 +554,16 @@
                 if (data.success) {
                     detailsContent.innerHTML = `<h2 style="color: #667eea; margin-bottom: 20px;">📖 ${surahName}</h2>`;
 
-                    for (const ayah of data.data) {
+                    data.data.forEach(ayah => {
                         const ayahDiv = document.createElement('div');
-                        ayahDiv.className = 'ayah-item';
+                        ayahDiv.className = 'ayah-line';
+                        ayahDiv.onclick = () => loadWords(ayah.ayah_id);
                         ayahDiv.innerHTML = `
-                            <div class="ayah-header">
-                                <span class="ayah-number">آية ${ayah.ayah_number}</span>
-                                <small>الجزء ${ayah.juz_number || '-'} • الصفحة ${ayah.page_number || '-'}</small>
-                            </div>
-                            <div class="ayah-text">${ayah.text_uthmani}</div>
-                            <button class="toggle-words-btn" onclick="loadWords(${ayah.ayah_id}, this)">
-                                🔍 عرض الكلمات مع الإعراب والصرف
-                            </button>
-                            <div class="words-container" id="words-${ayah.ayah_id}" style="display: none;"></div>
+                            <span class="ayah-text-inline">${ayah.text_uthmani}</span>
+                            <span class="ayah-number-inline">${ayah.ayah_number}</span>
                         `;
                         detailsContent.appendChild(ayahDiv);
-                    }
+                    });
                 }
             } catch (error) {
                 console.error('خطأ في تحميل الآيات:', error);
@@ -507,68 +571,86 @@
             }
         }
 
-        // تحميل كلمات آية
-        async function loadWords(ayahId, button) {
-            const container = document.getElementById(`words-${ayahId}`);
+        // تحميل كلمات آية وعرضها في Modal
+        async function loadWords(ayahId) {
+            const modal = document.getElementById('wordModal');
+            const modalBody = document.getElementById('modalBody');
 
-            if (container.style.display === 'none') {
-                container.innerHTML = '<div class="loading">جاري تحميل الكلمات</div>';
-                container.style.display = 'block';
-                button.textContent = '🔼 إخفاء الكلمات';
+            modalBody.innerHTML = '<div class="loading">جاري تحميل الكلمات</div>';
+            modal.style.display = 'block';
 
-                try {
-                    const response = await fetch(`/api/ayah/${ayahId}/words`);
-                    const data = await response.json();
+            try {
+                const response = await fetch(`/api/ayah/${ayahId}/words`);
+                const data = await response.json();
 
-                    if (data.success) {
-                        container.innerHTML = '<h4 style="color: #667eea; margin-bottom: 15px;">الكلمات مع الإعراب والصرف:</h4>';
+                if (data.success) {
+                    modalBody.innerHTML = '';
 
-                        data.data.forEach(word => {
-                            const wordDiv = document.createElement('div');
-                            wordDiv.className = 'word-item';
-                            wordDiv.innerHTML = `
-                                <div class="word-text">${word.word_text}</div>
-                                <div class="word-details">
-                                    ${word.word_simple ? `
-                                        <div class="detail-section">
-                                            <span class="detail-label">بدون تشكيل:</span>
-                                            <span class="detail-text">${word.word_simple}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${word.root_text ? `
-                                        <div class="detail-section">
-                                            <span class="detail-label">الجذر:</span>
-                                            <span class="detail-text">${word.root_text}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${word.irab_text ? `
-                                        <div class="detail-section">
-                                            <span class="detail-label">الإعراب:</span>
-                                            <span class="detail-text">${word.irab_text}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${word.sarf_text ? `
-                                        <div class="detail-section">
-                                            <span class="detail-label">الصرف:</span>
-                                            <span class="detail-text">${word.sarf_text}</span>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `;
-                            container.appendChild(wordDiv);
-                        });
-                    }
-                } catch (error) {
-                    console.error('خطأ في تحميل الكلمات:', error);
-                    container.innerHTML = '<div class="error">خطأ في التحميل</div>';
+                    data.data.forEach(word => {
+                        const wordCard = document.createElement('div');
+                        wordCard.className = 'word-card';
+
+                        let content = `<div class="word-title">${word.word_simple || word.word_text}</div>`;
+
+                        if (word.position_in_surah) {
+                            content += `<div class="word-info-line">
+                                <span class="word-info-label">ترتيبها في السورة:</span>
+                                <span class="word-info-value">${word.position_in_surah.toLocaleString('ar-EG')}</span>
+                            </div>`;
+                        }
+
+                        if (word.position_in_quran) {
+                            content += `<div class="word-info-line">
+                                <span class="word-info-label">ترتيبها في المصحف:</span>
+                                <span class="word-info-value">${word.position_in_quran.toLocaleString('ar-EG')}</span>
+                            </div>`;
+                        }
+
+                        if (word.root_text) {
+                            content += `<div class="word-info-line">
+                                <span class="word-info-label">الجذر:</span>
+                                <span class="word-info-value">${word.root_text}</span>
+                            </div>`;
+                        }
+
+                        if (word.irab_text) {
+                            content += `<div class="word-info-line">
+                                <span class="word-info-label">الإعراب:</span>
+                                <span class="word-info-value">${word.irab_text}</span>
+                            </div>`;
+                        }
+
+                        if (word.sarf_text) {
+                            content += `<div class="word-info-line">
+                                <span class="word-info-label">الصرف:</span>
+                                <span class="word-info-value">${word.sarf_text}</span>
+                            </div>`;
+                        }
+
+                        wordCard.innerHTML = content;
+                        modalBody.appendChild(wordCard);
+                    });
                 }
-            } else {
-                container.style.display = 'none';
-                button.textContent = '🔍 عرض الكلمات مع الإعراب والصرف';
+            } catch (error) {
+                console.error('خطأ في تحميل الكلمات:', error);
+                modalBody.innerHTML = '<div class="error">خطأ في التحميل</div>';
             }
         }
 
-        // البحث
+        // إغلاق Modal
+        function closeModal() {
+            document.getElementById('wordModal').style.display = 'none';
+        }
+
+        // إغلاق Modal بالضغط خارجه
+        window.onclick = function(event) {
+            const modal = document.getElementById('wordModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // البحث - محسّن
         let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', function(e) {
             clearTimeout(searchTimeout);
@@ -591,9 +673,16 @@
                         data.data.forEach(result => {
                             const item = document.createElement('div');
                             item.className = 'search-result-item';
+
+                            // تمييز النص المطابق
+                            const highlightedText = result.text_uthmani.replace(
+                                new RegExp(query, 'gi'),
+                                match => `<span class="highlight">${match}</span>`
+                            );
+
                             item.innerHTML = `
                                 <strong>${result.name_arabic} - آية ${result.ayah_number}</strong>
-                                <p>${result.text_uthmani}</p>
+                                <p>${highlightedText}</p>
                             `;
                             item.onclick = () => {
                                 loadAyahs(result.surah_id, result.name_arabic);
@@ -607,6 +696,7 @@
                     }
                 } catch (error) {
                     console.error('خطأ في البحث:', error);
+                    document.getElementById('searchResults').innerHTML = '<div class="error">خطأ في البحث</div>';
                 }
             }, 300);
         });
@@ -615,6 +705,13 @@
         window.addEventListener('load', () => {
             loadStats();
             loadSurahs();
+        });
+
+        // إغلاق Modal بمفتاح Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
         });
     </script>
 </body>
