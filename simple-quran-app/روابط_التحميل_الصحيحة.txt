@@ -1,0 +1,128 @@
+════════════════════════════════════════════════════════════════════════════
+          📦 روابط التحميل الصحيحة للملفات المحدثة (ZIP)
+════════════════════════════════════════════════════════════════════════════
+
+⚠️ تنبيه: الملفات المحدثة موجودة على فرع خاص وليس على main
+
+═══════════════════════════════════════════════════════════════════════════
+✅ الطريقة الأولى: تحميل ZIP مباشرة (الأسهل!)
+═══════════════════════════════════════════════════════════════════════════
+
+🔗 رابط التحميل المباشر للملفات المحدثة:
+
+https://github.com/mustafayakoub/duhatv/archive/refs/heads/claude/multilingual-programming-setup-011CUhD7ZhvWxnVqEUQ9rTsR.zip
+
+📝 اضغط على الرابط وسيبدأ التحميل فوراً!
+
+
+═══════════════════════════════════════════════════════════════════════════
+✅ الطريقة الثانية: عرض الفرع على GitHub أولاً
+═══════════════════════════════════════════════════════════════════════════
+
+🔗 رابط الفرع المحدث على GitHub:
+
+https://github.com/mustafayakoub/duhatv/tree/claude/multilingual-programming-setup-011CUhD7ZhvWxnVqEUQ9rTsR
+
+📝 الخطوات:
+1. افتح الرابط أعلاه
+2. اضغط على الزر الأخضر "Code"
+3. اختر "Download ZIP"
+
+
+═══════════════════════════════════════════════════════════════════════════
+✅ الطريقة الثالثة: روابط الملفات الفردية
+═══════════════════════════════════════════════════════════════════════════
+
+📁 الملفات المهمة (انقر بيمين → Save As):
+
+1️⃣ سكريبت التنظيف (clean_and_rebuild.py):
+https://raw.githubusercontent.com/mustafayakoub/duhatv/claude/multilingual-programming-setup-011CUhD7ZhvWxnVqEUQ9rTsR/simple-quran-app/clean_and_rebuild.py
+
+2️⃣ ملف تشغيل التنظيف (START_CLEAN_REBUILD.bat):
+https://raw.githubusercontent.com/mustafayakoub/duhatv/claude/multilingual-programming-setup-011CUhD7ZhvWxnVqEUQ9rTsR/simple-quran-app/START_CLEAN_REBUILD.bat
+
+3️⃣ التطبيق الرئيسي المحدث (quran_tree_viewer.py):
+https://raw.githubusercontent.com/mustafayakoub/duhatv/claude/multilingual-programming-setup-011CUhD7ZhvWxnVqEUQ9rTsR/simple-quran-app/quran_tree_viewer.py
+
+4️⃣ الواجهة المحدثة (tree_index.html):
+https://raw.githubusercontent.com/mustafayakoub/duhatv/claude/multilingual-programming-setup-011CUhD7ZhvWxnVqEUQ9rTsR/simple-quran-app/templates/tree_index.html
+
+5️⃣ ملف تشغيل التطبيق (RUN_TREE_VIEWER.bat):
+https://raw.githubusercontent.com/mustafayakoub/duhatv/claude/multilingual-programming-setup-011CUhD7ZhvWxnVqEUQ9rTsR/simple-quran-app/RUN_TREE_VIEWER.bat
+
+6️⃣ الدليل الشامل (README_FINAL.txt):
+https://raw.githubusercontent.com/mustafayakoub/duhatv/claude/multilingual-programming-setup-011CUhD7ZhvWxnVqEUQ9rTsR/simple-quran-app/README_FINAL.txt
+
+7️⃣ المكتبات المطلوبة (requirements.txt):
+https://raw.githubusercontent.com/mustafayakoub/duhatv/claude/multilingual-programming-setup-011CUhD7ZhvWxnVqEUQ9rTsR/simple-quran-app/requirements.txt
+
+
+═══════════════════════════════════════════════════════════════════════════
+📦 بعد التحميل
+═══════════════════════════════════════════════════════════════════════════
+
+✅ إذا حملت ZIP:
+────────────────────────────────────────────────────────────────────────────
+1. فك الضغط
+2. افتح المجلد المفكوك
+3. اذهب إلى مجلد: simple-quran-app
+4. انسخ كل المحتويات إلى: C:\quran11\simple-quran-app\
+
+✅ إذا حملت الملفات الفردية:
+────────────────────────────────────────────────────────────────────────────
+1. ضع الملفات في: C:\quran11\simple-quran-app\
+2. ضع tree_index.html في: C:\quran11\simple-quran-app\templates\
+
+
+═══════════════════════════════════════════════════════════════════════════
+🚀 التشغيل
+═══════════════════════════════════════════════════════════════════════════
+
+1️⃣ أولاً: حل مشكلة التكرار
+    اضغط مرتين على: START_CLEAN_REBUILD.bat
+    انتظر حتى ترى: ✅ القاعدة صحيحة ومكتملة!
+
+2️⃣ ثانياً: تشغيل التطبيق
+    اضغط مرتين على: RUN_TREE_VIEWER.bat
+    افتح المتصفح على: http://localhost:5000
+
+
+═══════════════════════════════════════════════════════════════════════════
+✨ المميزات في الإصدار المحدث
+═══════════════════════════════════════════════════════════════════════════
+
+🔧 حل مشكلة التكرار:
+   ✅ سكريبت تنظيف ذكي
+   ✅ قاعدة نظيفة من الصفر
+   ✅ 77,432 كلمة بالضبط (بدون تكرار!)
+
+🔍 البحث الذكي:
+   ✅ بحث بدون تشكيل (ابحث "محمد" تجد "مُحَمَّد")
+   ✅ بحث بالجذر (ابحث "رحم" تجد: رحمة، رحيم، رحمن...)
+   ✅ بحث فوري (النتائج أثناء الكتابة)
+   ✅ فلاتر متقدمة
+
+🎨 الواجهة:
+   ✅ تابين: العرض والتصفح / البحث
+   ✅ عرض شجري منظم للنتائج
+   ✅ تنسيق جميل: الكلمة (الجذر)
+   ✅ ترتيب في المصحف والسورة في سطر واحد
+
+
+═══════════════════════════════════════════════════════════════════════════
+💡 تأكد من التحديثات الأخيرة
+═══════════════════════════════════════════════════════════════════════════
+
+آخر تحديث: 2 نوفمبر 2025
+
+التحديثات الأخيرة:
+✅ 54d2b83 - إضافة رابط التحميل المباشر
+✅ 8f724a6 - إضافة دليل الملفات النهائية
+✅ 3a1c16b - إضافة سكريبت التنظيف
+✅ a061351 - إضافة البحث الذكي والتابات
+✅ 059d1a7 - تحسينات كبيرة على العارض
+
+
+═══════════════════════════════════════════════════════════════════════════
+                        جاهز للاستخدام! 🌙
+═══════════════════════════════════════════════════════════════════════════
