@@ -66,12 +66,78 @@
             opacity: 0.9;
         }
 
-        .search-box {
+        /* Tabs */
+        .tabs {
             background: white;
-            padding: 20px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f8f9fa;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            background: transparent;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            background: white;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Search Filters */
+        .search-filters {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .filter-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
         }
 
         .search-input {
@@ -165,7 +231,7 @@
             overflow-y: auto;
         }
 
-        /* نمط الآية الجديد - سطر واحد */
+        /* نمط الآية */
         .ayah-line {
             margin: 15px 0;
             padding: 15px;
@@ -275,7 +341,6 @@
             border-radius: 10px;
             padding: 20px;
             margin: 15px 0;
-            cursor: pointer;
             transition: all 0.3s;
         }
 
@@ -284,15 +349,35 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .word-title {
+        /* تنسيق جديد للكلمة */
+        .word-title-line {
             font-size: 2em;
             font-weight: bold;
             color: #667eea;
             margin-bottom: 15px;
-            text-align: center;
             padding: 10px;
             background: linear-gradient(135deg, #667eea10 0%, #764ba220 100%);
             border-radius: 8px;
+        }
+
+        .word-text {
+            display: inline;
+        }
+
+        .word-root {
+            display: inline;
+            color: #764ba2;
+            margin-right: 10px;
+        }
+
+        .word-positions-line {
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 5px;
+            border-right: 3px solid #667eea;
+            font-size: 1.1em;
+            line-height: 1.8;
         }
 
         .word-info-line {
@@ -309,7 +394,7 @@
             font-weight: bold;
             color: #667eea;
             display: inline-block;
-            min-width: 180px;
+            min-width: 120px;
         }
 
         .word-info-value {
@@ -374,35 +459,51 @@
             background: #764ba2;
         }
 
-        .search-results {
+        /* Search Results Tree */
+        .search-tree-results {
             margin-top: 20px;
         }
 
-        .search-result-item {
+        .search-tree-surah {
+            margin: 20px 0;
+        }
+
+        .search-tree-surah-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 15px;
-            margin: 10px 0;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-right: 4px solid #667eea;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
         }
 
-        .search-result-item:hover {
-            background: #e9ecef;
-            transform: translateX(-5px);
+        .search-tree-surah-header:hover {
+            transform: translateX(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .search-result-item strong {
-            color: #667eea;
-            display: block;
-            margin-bottom: 5px;
+        .search-tree-ayahs {
+            margin-top: 10px;
+            padding-right: 20px;
         }
 
         .highlight {
             background-color: #ffeb3b;
             padding: 2px 4px;
             border-radius: 3px;
+        }
+
+        .results-count {
+            color: #667eea;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
         }
     </style>
 </head>
@@ -437,30 +538,56 @@
             </div>
         </div>
 
-        <!-- Search Box -->
-        <div class="search-box">
-            <input type="text" class="search-input" id="searchInput" placeholder="🔍 ابحث في القرآن الكريم...">
-            <div id="searchResults" class="search-results"></div>
-        </div>
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="switchTab('browse')">
+                    📖 العرض والتصفح
+                </button>
+                <button class="tab-button" onclick="switchTab('search')">
+                    🔍 البحث
+                </button>
+            </div>
 
-        <!-- Content -->
-        <div class="content">
-            <!-- Surahs Panel -->
-            <div class="surahs-panel">
-                <h2>📚 السور</h2>
-                <div id="surahsList">
-                    <div class="loading">جاري التحميل</div>
+            <!-- Browse Tab -->
+            <div id="browseTab" class="tab-content active">
+                <div class="content">
+                    <!-- Surahs Panel -->
+                    <div class="surahs-panel">
+                        <h2>📚 السور</h2>
+                        <div id="surahsList">
+                            <div class="loading">جاري التحميل</div>
+                        </div>
+                    </div>
+
+                    <!-- Details Panel -->
+                    <div class="details-panel">
+                        <div id="detailsContent" class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <h3>اختر سورة من القائمة</h3>
+                            <p>سيتم عرض الآيات والكلمات مع الإعراب والصرف</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Details Panel -->
-            <div class="details-panel">
-                <div id="detailsContent" class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <h3>اختر سورة من القائمة</h3>
-                    <p>سيتم عرض الآيات والكلمات مع الإعراب والصرف</p>
+            <!-- Search Tab -->
+            <div id="searchTab" class="tab-content">
+                <div style="max-width: 1000px; margin: 0 auto;">
+                    <input type="text" class="search-input" id="searchInput" placeholder="🔍 ابحث في القرآن الكريم... (اكتب حرفين على الأقل)">
+
+                    <div class="search-filters">
+                        <button class="filter-btn active" data-type="text" onclick="setSearchFilter('text')">
+                            📝 بحث نصي
+                        </button>
+                        <button class="filter-btn" data-type="root" onclick="setSearchFilter('root')">
+                            🌳 بحث بالجذر
+                        </button>
+                    </div>
+
+                    <div id="searchResults" class="search-tree-results"></div>
                 </div>
             </div>
         </div>
@@ -470,7 +597,7 @@
     <div id="wordModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">تفاصيل الكلمة</h2>
+                <h2 id="modalTitle">تفاصيل الكلمات</h2>
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body" id="modalBody">
@@ -482,6 +609,43 @@
     <script>
         let currentSurahId = null;
         let currentSurahName = null;
+        let searchFilterType = 'text';
+
+        // Switch between tabs
+        function switchTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            if (tab === 'browse') {
+                document.getElementById('browseTab').classList.add('active');
+            } else if (tab === 'search') {
+                document.getElementById('searchTab').classList.add('active');
+                document.getElementById('searchInput').focus();
+            }
+        }
+
+        // Set search filter
+        function setSearchFilter(type) {
+            searchFilterType = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Trigger search again if there's a query
+            const query = document.getElementById('searchInput').value.trim();
+            if (query.length >= 2) {
+                performSearch(query);
+            }
+        }
 
         // تحميل الإحصائيات
         async function loadStats() {
@@ -590,29 +754,30 @@
                         const wordCard = document.createElement('div');
                         wordCard.className = 'word-card';
 
-                        let content = `<div class="word-title">${word.word_simple || word.word_text}</div>`;
-
-                        if (word.position_in_surah) {
-                            content += `<div class="word-info-line">
-                                <span class="word-info-label">ترتيبها في السورة:</span>
-                                <span class="word-info-value">${word.position_in_surah.toLocaleString('ar-EG')}</span>
-                            </div>`;
-                        }
-
-                        if (word.position_in_quran) {
-                            content += `<div class="word-info-line">
-                                <span class="word-info-label">ترتيبها في المصحف:</span>
-                                <span class="word-info-value">${word.position_in_quran.toLocaleString('ar-EG')}</span>
-                            </div>`;
-                        }
-
+                        // التنسيق الجديد: الكلمة + الجذر في سطر واحد
+                        let content = '<div class="word-title-line">';
+                        content += `<span class="word-text">${word.word_simple || word.word_text}</span>`;
                         if (word.root_text) {
-                            content += `<div class="word-info-line">
-                                <span class="word-info-label">الجذر:</span>
-                                <span class="word-info-value">${word.root_text}</span>
-                            </div>`;
+                            content += ` <span class="word-root">(${word.root_text})</span>`;
+                        }
+                        content += '</div>';
+
+                        // السطر الثاني: ترتيبها في المصحف + ترتيبها في السورة
+                        if (word.position_in_quran || word.position_in_surah) {
+                            content += '<div class="word-positions-line">';
+                            if (word.position_in_quran) {
+                                content += `<span class="word-info-label">ترتيبها في المصحف:</span> `;
+                                content += `<span class="word-info-value">${word.position_in_quran.toLocaleString('ar-EG')}</span>`;
+                            }
+                            if (word.position_in_surah) {
+                                content += ` • `;
+                                content += `<span class="word-info-label">ترتيبها في السورة:</span> `;
+                                content += `<span class="word-info-value">${word.position_in_surah.toLocaleString('ar-EG')}</span>`;
+                            }
+                            content += '</div>';
                         }
 
+                        // الإعراب والصرف
                         if (word.irab_text) {
                             content += `<div class="word-info-line">
                                 <span class="word-info-label">الإعراب:</span>
@@ -650,7 +815,7 @@
             }
         }
 
-        // البحث - محسّن
+        // البحث الذكي - الفوري
         let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', function(e) {
             clearTimeout(searchTimeout);
@@ -661,45 +826,84 @@
                 return;
             }
 
-            searchTimeout = setTimeout(async () => {
-                try {
-                    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-                    const data = await response.json();
-
-                    const resultsDiv = document.getElementById('searchResults');
-                    if (data.success && data.count > 0) {
-                        resultsDiv.innerHTML = `<h3 style="color: #667eea; margin: 15px 0;">النتائج (${data.count}):</h3>`;
-
-                        data.data.forEach(result => {
-                            const item = document.createElement('div');
-                            item.className = 'search-result-item';
-
-                            // تمييز النص المطابق
-                            const highlightedText = result.text_uthmani.replace(
-                                new RegExp(query, 'gi'),
-                                match => `<span class="highlight">${match}</span>`
-                            );
-
-                            item.innerHTML = `
-                                <strong>${result.name_arabic} - آية ${result.ayah_number}</strong>
-                                <p>${highlightedText}</p>
-                            `;
-                            item.onclick = () => {
-                                loadAyahs(result.surah_id, result.name_arabic);
-                                document.getElementById('searchInput').value = '';
-                                resultsDiv.innerHTML = '';
-                            };
-                            resultsDiv.appendChild(item);
-                        });
-                    } else if (data.count === 0) {
-                        resultsDiv.innerHTML = '<p style="padding: 15px; color: #6c757d;">لا توجد نتائج</p>';
-                    }
-                } catch (error) {
-                    console.error('خطأ في البحث:', error);
-                    document.getElementById('searchResults').innerHTML = '<div class="error">خطأ في البحث</div>';
-                }
+            // بحث فوري بعد 300ms
+            searchTimeout = setTimeout(() => {
+                performSearch(query);
             }, 300);
         });
+
+        async function performSearch(query) {
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '<div class="loading">جاري البحث</div>';
+
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=${searchFilterType}`);
+                const data = await response.json();
+
+                if (data.success && data.count > 0) {
+                    resultsDiv.innerHTML = `<div class="results-count">إنشاء النتائج • العدد: ${data.count.toLocaleString('ar-EG')} آية في ${data.total_surahs.toLocaleString('ar-EG')} سورة</div>`;
+
+                    // عرض شجري للنتائج
+                    data.data.forEach(surah => {
+                        const surahDiv = document.createElement('div');
+                        surahDiv.className = 'search-tree-surah';
+
+                        const surahHeader = document.createElement('div');
+                        surahHeader.className = 'search-tree-surah-header';
+                        surahHeader.textContent = `${surah.name_arabic} (${surah.ayahs.length} آية)`;
+                        surahDiv.appendChild(surahHeader);
+
+                        const ayahsDiv = document.createElement('div');
+                        ayahsDiv.className = 'search-tree-ayahs';
+
+                        surah.ayahs.forEach(ayah => {
+                            const ayahDiv = document.createElement('div');
+                            ayahDiv.className = 'ayah-line';
+                            ayahDiv.onclick = () => loadWords(ayah.ayah_id);
+
+                            // تمييز النص المطابق
+                            let highlightedText = ayah.text_uthmani;
+                            try {
+                                // إزالة التشكيل من النص للمقارنة
+                                const normalizedText = removeArabicDiacritics(ayah.text_uthmani);
+                                const normalizedQuery = removeArabicDiacritics(query);
+
+                                const index = normalizedText.indexOf(normalizedQuery);
+                                if (index !== -1) {
+                                    const start = index;
+                                    const end = index + normalizedQuery.length;
+                                    highlightedText = ayah.text_uthmani.substring(0, start) +
+                                        '<span class="highlight">' + ayah.text_uthmani.substring(start, end) + '</span>' +
+                                        ayah.text_uthmani.substring(end);
+                                }
+                            } catch (e) {
+                                // fallback to simple highlighting
+                                highlightedText = ayah.text_uthmani;
+                            }
+
+                            ayahDiv.innerHTML = `
+                                <span class="ayah-text-inline">${highlightedText}</span>
+                                <span class="ayah-number-inline">${ayah.ayah_number}</span>
+                            `;
+                            ayahsDiv.appendChild(ayahDiv);
+                        });
+
+                        surahDiv.appendChild(ayahsDiv);
+                        resultsDiv.appendChild(surahDiv);
+                    });
+                } else if (data.count === 0) {
+                    resultsDiv.innerHTML = '<p style="padding: 15px; color: #6c757d; text-align: center;">لا توجد نتائج</p>';
+                }
+            } catch (error) {
+                console.error('خطأ في البحث:', error);
+                resultsDiv.innerHTML = '<div class="error">خطأ في البحث</div>';
+            }
+        }
+
+        // دالة لإزالة التشكيل (مطابقة لما في Python)
+        function removeArabicDiacritics(text) {
+            return text.replace(/[\u064B-\u0652\u0640]/g, '');
+        }
 
         // تحميل البيانات عند فتح الصفحة
         window.addEventListener('load', () => {

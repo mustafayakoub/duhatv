@@ -10,12 +10,29 @@
 from flask import Flask, render_template, jsonify, request
 import sqlite3
 import os
+import re
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
 # مسار قاعدة البيانات
 DB_PATH = r"C:\quran11\quran_unified.db"
+
+# دالة لإزالة التشكيل للبحث الذكي
+def normalize_arabic(text):
+    """إزالة التشكيل من النص العربي"""
+    arabic_diacritics = re.compile("""
+                             ّ    | # Tashdid
+                             َ    | # Fatha
+                             ً    | # Tanwin Fath
+                             ُ    | # Damma
+                             ٌ    | # Tanwin Damm
+                             ِ    | # Kasra
+                             ٍ    | # Tanwin Kasr
+                             ْ    | # Sukun
+                             ـ     # Tatwil/Kashida
+                         """, re.VERBOSE)
+    return arabic_diacritics.sub('', text)
 
 
 def get_db():
@@ -232,8 +249,9 @@ def get_stats():
 
 @app.route('/api/search')
 def search():
-    """البحث في القرآن - محسّن"""
+    """البحث الذكي في القرآن - بدون تشكيل"""
     query = request.args.get('q', '').strip()
+    search_type = request.args.get('type', 'text')  # text, root, etc.
 
     if len(query) < 2:
         return jsonify({
@@ -245,30 +263,81 @@ def search():
         conn = get_db()
         cursor = conn.cursor()
 
-        # البحث في نص الآيات
-        cursor.execute("""
-            SELECT
-                a.ayah_id,
-                a.ayah_number,
-                a.text_uthmani,
-                s.surah_id,
-                s.name_arabic,
-                a.juz_number,
-                a.page_number
-            FROM ayahs a
-            JOIN surahs s ON a.surah_id = s.surah_id
-            WHERE a.text_uthmani LIKE ?
-            ORDER BY s.surah_id, a.ayah_number
-            LIMIT 50
-        """, (f'%{query}%',))
+        # تطبيع النص للبحث بدون تشكيل
+        normalized_query = normalize_arabic(query)
 
-        results = [dict(row) for row in cursor.fetchall()]
+        results = []
+
+        if search_type == 'root':
+            # البحث بالجذر
+            cursor.execute("""
+                SELECT DISTINCT
+                    a.ayah_id,
+                    a.ayah_number,
+                    a.text_uthmani,
+                    s.surah_id,
+                    s.name_arabic,
+                    a.juz_number,
+                    a.page_number
+                FROM ayahs a
+                JOIN surahs s ON a.surah_id = s.surah_id
+                JOIN words w ON a.ayah_id = w.ayah_id
+                WHERE w.root_text LIKE ?
+                ORDER BY s.surah_id, a.ayah_number
+                LIMIT 100
+            """, (f'%{query}%',))
+            results = [dict(row) for row in cursor.fetchall()]
+        else:
+            # البحث النصي الذكي - بدون تشكيل
+            cursor.execute("""
+                SELECT
+                    a.ayah_id,
+                    a.ayah_number,
+                    a.text_uthmani,
+                    s.surah_id,
+                    s.name_arabic,
+                    s.ayah_count,
+                    a.juz_number,
+                    a.page_number
+                FROM ayahs a
+                JOIN surahs s ON a.surah_id = s.surah_id
+                ORDER BY s.surah_id, a.ayah_number
+            """)
+
+            # فلترة النتائج باستخدام البحث بدون تشكيل
+            all_ayahs = cursor.fetchall()
+            for ayah in all_ayahs:
+                normalized_text = normalize_arabic(ayah['text_uthmani'])
+                if normalized_query in normalized_text:
+                    results.append(dict(ayah))
+                    if len(results) >= 100:
+                        break
+
+        # تنظيم النتائج حسب السور
+        organized_results = {}
+        for result in results:
+            surah_id = result['surah_id']
+            if surah_id not in organized_results:
+                organized_results[surah_id] = {
+                    'surah_id': surah_id,
+                    'name_arabic': result['name_arabic'],
+                    'ayahs': []
+                }
+            organized_results[surah_id]['ayahs'].append({
+                'ayah_id': result['ayah_id'],
+                'ayah_number': result['ayah_number'],
+                'text_uthmani': result['text_uthmani'],
+                'juz_number': result.get('juz_number'),
+                'page_number': result.get('page_number')
+            })
+
         conn.close()
 
         return jsonify({
             'success': True,
             'count': len(results),
-            'data': results
+            'total_surahs': len(organized_results),
+            'data': list(organized_results.values())
         })
 
     except Exception as e:
