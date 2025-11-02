@@ -12,7 +12,7 @@ RUN apk add --no-cache musl-dev openssl-dev
 WORKDIR /app
 
 # Copy manifests
-COPY Cargo.toml ./
+COPY Cargo.toml Cargo.lock ./
 
 # Copy source code
 COPY src ./src
