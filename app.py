@@ -74,11 +74,64 @@ def get_surahs():
     return jsonify(surahs)
 
 
+@app.route('/api/versions')
+def get_versions():
+    """الحصول على قائمة القراءات المتاحة"""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            version_code,
+            version_name_ar,
+            version_name_en,
+            qiraa,
+            script_type,
+            is_default
+        FROM text_versions
+        WHERE qiraa IS NOT NULL
+        ORDER BY
+            CASE
+                WHEN is_default = 1 THEN 0
+                ELSE 1
+            END,
+            id
+    """)
+
+    versions = []
+    for row in cursor.fetchall():
+        versions.append({
+            'code': row['version_code'],
+            'name_ar': row['version_name_ar'],
+            'name_en': row['version_name_en'],
+            'qiraa': row['qiraa'],
+            'script_type': row['script_type'],
+            'is_default': bool(row['is_default'])
+        })
+
+    conn.close()
+    return jsonify(versions)
+
+
 @app.route('/api/surah/<int:surah_no>')
 def get_surah(surah_no):
     """الحصول على آيات سورة معينة"""
+    version_code = request.args.get('version', 'hafs_smart_v8')
+
     conn = get_db()
     cursor = conn.cursor()
+
+    # الحصول على version_id
+    version_id = cursor.execute(
+        "SELECT id FROM text_versions WHERE version_code = ?",
+        (version_code,)
+    ).fetchone()
+
+    if not version_id:
+        conn.close()
+        return jsonify({'error': 'Version not found'}), 404
+
+    version_id = version_id[0]
 
     cursor.execute("""
         SELECT
@@ -92,9 +145,9 @@ def get_surah(surah_no):
             t.letter_count
         FROM ayahs a
         JOIN ayah_texts t ON a.id = t.ayah_id
-        WHERE a.sura_no = ?
+        WHERE a.sura_no = ? AND t.version_id = ?
         ORDER BY a.aya_no
-    """, (surah_no,))
+    """, (surah_no, version_id))
 
     ayahs = []
     for row in cursor.fetchall():

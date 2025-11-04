@@ -1,6 +1,7 @@
 // حالة التطبيق
 const state = {
     currentSurah: null,
+    currentVersion: 'hafs_smart_v8',
     fontSize: 28,
     fontFamily: 'uthmanic-hafs-v22',
     viewMode: 'mushaf',
@@ -15,6 +16,7 @@ const elements = {
     searchInput: document.getElementById('searchInput'),
     searchResults: document.getElementById('searchResults'),
     fontSelect: document.getElementById('fontSelect'),
+    versionSelect: document.getElementById('versionSelect'),
     fontSizeRange: document.getElementById('fontSizeRange'),
     fontSizeValue: document.getElementById('fontSizeValue'),
     viewMode: document.getElementById('viewMode'),
@@ -30,8 +32,33 @@ const elements = {
 // تحميل البيانات الأولية
 async function init() {
     await loadStats();
+    await loadVersions();
     await loadSurahs();
     setupEventListeners();
+}
+
+// تحميل القراءات المتاحة
+async function loadVersions() {
+    try {
+        const response = await fetch('/api/versions');
+        const versions = await response.json();
+
+        elements.versionSelect.innerHTML = '';
+
+        versions.forEach(version => {
+            const option = document.createElement('option');
+            option.value = version.code;
+            option.textContent = `${version.name_ar} (${version.qiraa})`;
+            if (version.is_default) {
+                option.selected = true;
+                state.currentVersion = version.code;
+            }
+            elements.versionSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('خطأ في تحميل القراءات:', error);
+        elements.versionSelect.innerHTML = '<option>خطأ في التحميل</option>';
+    }
 }
 
 // تحميل الإحصائيات
@@ -90,7 +117,7 @@ async function loadSurah(surahNo) {
 
         elements.ayahsContainer.innerHTML = '<div class="loading">جاري التحميل...</div>';
 
-        const response = await fetch(`/api/surah/${surahNo}`);
+        const response = await fetch(`/api/surah/${surahNo}?version=${state.currentVersion}`);
         const ayahs = await response.json();
 
         displayAyahs(ayahs);
@@ -259,6 +286,14 @@ elements.fontSizeRange.addEventListener('input', (e) => {
     state.fontSize = parseInt(e.target.value);
     elements.fontSizeValue.textContent = state.fontSize;
     updateFontSettings();
+});
+
+// اختيار القراءة
+elements.versionSelect.addEventListener('change', (e) => {
+    state.currentVersion = e.target.value;
+    if (state.currentSurah) {
+        loadSurah(state.currentSurah);
+    }
 });
 
 // طريقة العرض
