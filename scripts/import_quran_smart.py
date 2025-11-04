@@ -153,6 +153,7 @@ class QuranSmartImporter:
         # خريطة أسماء الملفات إلى أكواد الإصدارات
         mapping = {
             'hafs_smart_v8': 'hafs_smart_v8',
+            'hafs': 'hafs',
             'warsh': 'warsh',
             'qaloon': 'qaloon',
             'aldori': 'aldori',
@@ -160,6 +161,8 @@ class QuranSmartImporter:
             'shobah': 'shobah',
             'khalaf': 'khalaf',
             'khallad': 'khallad',
+            'tajweed': 'tajweed',
+            'تجويد': 'tajweed',
             'uthmani_full': 'uthmani_full',
             'uthmani_minimal': 'uthmani_minimal',
             'uthmani_none': 'uthmani_none',
@@ -243,15 +246,18 @@ class QuranSmartImporter:
 
         for i, item in enumerate(data, 1):
             try:
-                # استخراج البيانات
-                sura_no = item.get('sura_no')
-                aya_no = item.get('aya_no')
+                # استخراج البيانات (دعم تنسيقات مختلفة)
+                # التنسيق الأول: sura_no, aya_no
+                sura_no = item.get('sura_no') or item.get('surahNo')
+                aya_no = item.get('aya_no') or item.get('ayahNo')
                 jozz = item.get('jozz', 1)
-                page = item.get('page', 1)
+                page = item.get('page') or item.get('pageNo') or 1
                 line_start = item.get('line_start')
                 line_end = item.get('line_end')
-                aya_text = item.get('aya_text', '')
-                aya_text_emlaey = item.get('aya_text_emlaey', '')
+
+                # النصوص (دعم التجويد)
+                aya_text = item.get('aya_text', '') or item.get('tajweedText', '')
+                aya_text_emlaey = item.get('aya_text_emlaey', '') or aya_text
 
                 # التحقق من البيانات الأساسية
                 if not sura_no or not aya_no:

@@ -82,6 +82,12 @@ def import_all_files(directory):
             version = 'khalaf'
         elif 'khallad' in filename_lower:
             version = 'khallad'
+        elif 'tajweed' in filename_lower or 'تجويد' in filename_lower:
+            version = 'tajweed'
+        elif 'uthmani' in filename_lower or 'عثماني' in filename_lower:
+            version = 'uthmani'
+        elif 'imlaei' in filename_lower or 'إملائي' in filename_lower:
+            version = 'imlaei'
 
         # بناء الأمر
         cmd = [sys.executable, 'scripts/import_quran_smart.py', '--file', str(file_path)]
