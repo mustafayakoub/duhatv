@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 تحميل التحديثات - دُحَاة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: right;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .features {
+            text-align: right;
+            margin: 20px 0;
+        }
+
+        .features ul {
+            list-style: none;
+        }
+
+        .features li {
+            padding: 8px 0;
+            color: #555;
+        }
+
+        .features li:before {
+            content: "✅ ";
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #856404;
+            text-align: right;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 تحميل التحديثات</h1>
+        <p class="subtitle">دُحَاة - تطبيق القرآن الرقمي v2.5</p>
+
+        <div class="info-box">
+            <h3>معلومات الملف</h3>
+            <div class="info-item">
+                <span class="info-label">اسم الملف:</span>
+                <span class="info-value">duhatv_updates_20251104.zip</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">الحجم:</span>
+                <span class="info-value">58 KB</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">التاريخ:</span>
+                <span class="info-value">4 نوفمبر 2025</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">الإصدار:</span>
+                <span class="info-value">v2.5</span>
+            </div>
+        </div>
+
+        <a href="/download/updates" class="download-btn">
+            ⬇️ تحميل الآن
+        </a>
+
+        <div class="features">
+            <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 15px;">✨ الجديد في هذا الإصدار:</h3>
+            <ul>
+                <li>دعم 6 قراءات مختلفة (حفص، ورش، قالون، الدوري، السوسي، شعبة)</li>
+                <li>دعم نسخة التجويد الملون (18 حكم تجويد)</li>
+                <li>سكريبت استيراد تلقائي (import_all.ps1)</li>
+                <li>سكريبت استيراد التجويد (import_tajweed.ps1)</li>
+                <li>دليل البداية السريعة (QUICK_START.md)</li>
+                <li>دليل الاستيراد الشامل (README_IMPORT.md)</li>
+                <li>مرجع أحكام التجويد (TAJWEED_CODES.md)</li>
+                <li>فحص ملفات JSON قبل الاستيراد (check_json.py)</li>
+            </ul>
+        </div>
+
+        <div class="note">
+            <strong>💡 ملاحظة:</strong> الملف لا يحتوي على البيانات (ملفات القراءات) أو الخطوط. هذه موجودة مسبقاً على جهازك في C:\QURAN2
+        </div>
+
+        <div class="footer">
+            <p>الحمد لله 🤲</p>
+            <p style="margin-top: 10px;">
+                <a href="/" style="color: #667eea; text-decoration: none;">← العودة للتطبيق</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

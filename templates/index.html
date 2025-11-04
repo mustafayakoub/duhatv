@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>القرآن الكريم - تطبيق رقمي</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- الهيدر -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</h1>
+            <div class="header-stats" id="headerStats">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalAyahs">...</span>
+                    <span class="stat-label">آية</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalWords">...</span>
+                    <span class="stat-label">كلمة</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalLetters">...</span>
+                    <span class="stat-label">حرف</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- القائمة الجانبية -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>فهرس السور</h2>
+            <button class="btn-icon" id="closeSidebar" aria-label="إغلاق">✕</button>
+        </div>
+
+        <div class="search-box">
+            <input type="search" id="searchInput" placeholder="🔍 ابحث في القرآن..." autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+
+        <div class="surahs-list" id="surahsList">
+            <div class="loading">جاري التحميل...</div>
+        </div>
+    </aside>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content" id="mainContent">
+        <button class="btn-menu" id="openSidebar" aria-label="القائمة">☰</button>
+
+        <!-- شريط الأدوات -->
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <label for="fontSelect">الخط:</label>
+                <select id="fontSelect" class="form-select">
+                    <optgroup label="خطوط عثمانية">
+                        <option value="uthmanic-hafs-v22" selected>Uthmanic Hafs V22 ⭐</option>
+                        <option value="uthmanic-hafs-v18">Uthmanic Hafs V18</option>
+                        <option value="uthman-tn">Uthman TN</option>
+                        <option value="uthman-tn1">Uthman TN1</option>
+                    </optgroup>
+                    <optgroup label="خطوط كوفية">
+                        <option value="kfgqpc-kufi-ext">KFGQPC Kufi Extended</option>
+                        <option value="kfgqpc-kufi-sty">KFGQPC Kufi Style</option>
+                        <option value="dq7-kfi">DQ7 KFI</option>
+                    </optgroup>
+                    <optgroup label="خطوط أخرى">
+                        <option value="aljalil">الجليل (AlJalil)</option>
+                        <option value="aljalil-dot">الجليل بالنقاط</option>
+                        <option value="kfgqpc-an">KFGQPC An</option>
+                        <option value="kfgqpc-an-light">KFGQPC An Light</option>
+                    </optgroup>
+                    <optgroup label="خطوط ويب">
+                        <option value="amiri">أميري (Amiri)</option>
+                        <option value="cairo">القاهرة (Cairo)</option>
+                        <option value="scheherazade">شهرزاد (Scheherazade)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="toolbar-group">
+                <label for="versionSelect">القراءة:</label>
+                <select id="versionSelect" class="form-select">
+                    <option value="">جاري التحميل...</option>
+                </select>
+            </div>
+
+            <div class="toolbar-group">
+                <label for="fontSizeRange">حجم الخط:</label>
+                <input type="range" id="fontSizeRange" min="16" max="48" value="28" class="form-range">
+                <span id="fontSizeValue">28</span>
+            </div>
+
+            <div class="toolbar-group">
+                <label for="viewMode">العرض:</label>
+                <select id="viewMode" class="form-select">
+                    <option value="mushaf">المصحف (تقليدي)</option>
+                    <option value="list">قائمة</option>
+                    <option value="card">بطاقات</option>
+                </select>
+            </div>
+
+            <div class="toolbar-group">
+                <button class="btn btn-secondary" id="toggleNight">🌙 الوضع الليلي</button>
+            </div>
+        </div>
+
+        <!-- عرض الآيات -->
+        <div class="ayahs-container" id="ayahsContainer">
+            <div class="welcome-screen">
+                <div class="welcome-icon">📖</div>
+                <h2>مرحباً بك في القرآن الكريم</h2>
+                <p>اختر سورة من القائمة الجانبية للبدء</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
