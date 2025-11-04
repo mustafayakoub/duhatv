@@ -6,9 +6,10 @@
 تطبيق Flask بسيط لعرض القرآن الكريم
 """
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_file
 import sqlite3
 from pathlib import Path
+import os
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -27,6 +28,12 @@ def get_db():
 def index():
     """الصفحة الرئيسية"""
     return render_template('index.html')
+
+
+@app.route('/download')
+def download_page():
+    """صفحة التحميل"""
+    return render_template('download.html')
 
 
 @app.route('/api/surahs')
@@ -160,6 +167,27 @@ def get_stats():
         'total_words': total_words,
         'total_letters': total_letters
     })
+
+
+@app.route('/download/updates')
+def download_updates():
+    """تحميل ملف التحديثات المضغوط"""
+    # البحث عن أحدث ملف zip
+    import glob
+    zip_files = glob.glob('duhatv_updates_*.zip')
+
+    if not zip_files:
+        return jsonify({'error': 'ملف التحديثات غير موجود'}), 404
+
+    # أحدث ملف
+    latest_zip = sorted(zip_files)[-1]
+
+    return send_file(
+        latest_zip,
+        mimetype='application/zip',
+        as_attachment=True,
+        download_name=os.path.basename(latest_zip)
+    )
 
 
 if __name__ == '__main__':
