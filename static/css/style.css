@@ -1,3 +1,78 @@
+/* الخطوط المخصصة */
+@font-face {
+    font-family: 'AlJalil';
+    src: url('../fonts/AlJalil_v01.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'AlJalilDot';
+    src: url('../fonts/AlJalilDot_v01.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'DQ7 KFI';
+    src: url('../fonts/DQ7_KFI_M1.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'KFGQPC Kufi Extended';
+    src: url('../fonts/KFGQPC-KufiExtV14.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'KFGQPC Kufi Style';
+    src: url('../fonts/KFGQPC-KufiStyV14.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'KFGQPC An';
+    src: url('../fonts/KFGQPCAnRegular.ttf') format('truetype');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'KFGQPC An';
+    src: url('../fonts/KFGQPCAnBold.ttf') format('truetype');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'KFGQPC An Light';
+    src: url('../fonts/KFGQPCAnLight.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'KFGQPC An Extra';
+    src: url('../fonts/KFGQPCAnExtra.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Uthmanic Hafs V22';
+    src: url('../fonts/uthmanic_hafs_v22.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Uthmanic Hafs V18';
+    src: url('../fonts/UthmanicHafs1 Ver18.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Uthman TN';
+    src: url('../fonts/UthmanTN_v2-0.ttf') format('truetype');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Uthman TN';
+    src: url('../fonts/UthmanTNB_v2-0.ttf') format('truetype');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'Uthman TN1';
+    src: url('../fonts/UthmanTN1 Ver10.otf') format('opentype');
+}
+
 /* المتغيرات */
 :root {
     --primary-color: #1e7e34;

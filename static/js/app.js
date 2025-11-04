@@ -2,7 +2,7 @@
 const state = {
     currentSurah: null,
     fontSize: 28,
-    fontFamily: 'amiri',
+    fontFamily: 'uthmanic-hafs-v22',
     viewMode: 'mushaf',
     nightMode: false
 };
@@ -218,9 +218,26 @@ document.addEventListener('click', (e) => {
 function updateFontSettings() {
     const ayahElements = document.querySelectorAll('.ayah, .ayah-text');
     const fontMap = {
+        // خطوط عثمانية
+        'uthmanic-hafs-v22': "'Uthmanic Hafs V22', serif",
+        'uthmanic-hafs-v18': "'Uthmanic Hafs V18', serif",
+        'uthman-tn': "'Uthman TN', serif",
+        'uthman-tn1': "'Uthman TN1', serif",
+
+        // خطوط كوفية
+        'kfgqpc-kufi-ext': "'KFGQPC Kufi Extended', serif",
+        'kfgqpc-kufi-sty': "'KFGQPC Kufi Style', serif",
+        'dq7-kfi': "'DQ7 KFI', serif",
+
+        // خطوط أخرى
+        'aljalil': "'AlJalil', serif",
+        'aljalil-dot': "'AlJalilDot', serif",
+        'kfgqpc-an': "'KFGQPC An', sans-serif",
+        'kfgqpc-an-light': "'KFGQPC An Light', sans-serif",
+
+        // خطوط ويب
         'amiri': "'Amiri', serif",
         'cairo': "'Cairo', sans-serif",
-        'traditional-arabic': "'Traditional Arabic', serif",
         'scheherazade': "'Scheherazade New', serif"
     };
 
