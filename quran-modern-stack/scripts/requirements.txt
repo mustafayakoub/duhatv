@@ -1,2 +1,14 @@
-psycopg2-binary==2.9.9
+# Python Requirements for Quran Data Import Scripts
+# متطلبات Python لسكريبتات استيراد بيانات القرآن
+
+# Database
+psycopg2-binary==2.9.9  # PostgreSQL adapter
+
+# Environment Variables
 python-dotenv==1.0.0
+
+# Optional: Progress bars
+tqdm>=4.66.0
+
+# Optional: Better CLI
+click>=8.1.7
