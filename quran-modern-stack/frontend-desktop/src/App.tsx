@@ -1,7 +1,17 @@
 import { useState } from 'react'
+import { invoke } from '@tauri-apps/api/tauri'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [name, setName] = useState('')
+  const [greetMsg, setGreetMsg] = useState('')
+
+  async function greet() {
+    if (name.trim()) {
+      // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+      setGreetMsg(await invoke('greet', { name }))
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-golden-50 via-bronze-50 to-golden-100">
@@ -45,15 +55,41 @@ function App() {
               </p>
             </div>
 
-            {/* Demo Counter */}
-            <div className="bg-gradient-to-r from-golden-100 to-bronze-100 p-6 rounded-xl text-center">
-              <p className="text-gray-700 mb-4 font-arabic">اختبار التطبيق:</p>
-              <button
-                onClick={() => setCount((count) => count + 1)}
-                className="bg-golden-500 hover:bg-golden-600 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg"
-              >
-                العداد: {count}
-              </button>
+            {/* Tauri Greeting Demo */}
+            <div className="bg-gradient-to-r from-golden-100 to-bronze-100 p-6 rounded-xl">
+              <p className="text-gray-700 mb-4 font-arabic text-center">اختبار Tauri - أدخل اسمك:</p>
+              <div className="flex gap-3 mb-4">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && greet()}
+                  placeholder="اكتب اسمك هنا..."
+                  className="flex-1 px-4 py-3 rounded-lg border-2 border-golden-300 focus:border-golden-500 focus:outline-none font-arabic text-right"
+                />
+                <button
+                  onClick={greet}
+                  className="bg-golden-500 hover:bg-golden-600 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg font-arabic"
+                >
+                  تحية
+                </button>
+              </div>
+              {greetMsg && (
+                <div className="bg-white p-4 rounded-lg border-2 border-golden-400 text-center">
+                  <p className="text-golden-800 font-bold text-lg font-arabic">{greetMsg}</p>
+                </div>
+              )}
+
+              {/* Counter Demo */}
+              <div className="mt-6 text-center">
+                <p className="text-gray-600 mb-2 font-arabic text-sm">عداد React:</p>
+                <button
+                  onClick={() => setCount((count) => count + 1)}
+                  className="bg-bronze-500 hover:bg-bronze-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 shadow font-arabic"
+                >
+                  العداد: {count}
+                </button>
+              </div>
             </div>
 
             {/* Stats */}

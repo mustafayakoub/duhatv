@@ -20,17 +20,49 @@
 - **Rust** 1.75+ (لبناء Tauri)
 - **npm** أو **yarn** أو **pnpm**
 
+### تثبيت Rust (إذا لم يكن مثبتاً)
+
+**على Windows:**
+```powershell
+# الخيار 1: استخدام rustup (موصى به)
+# قم بتحميل وتثبيت من: https://rustup.rs/
+# ثم قم بتثبيت Visual Studio Build Tools أو استخدم WSL2
+
+# الخيار 2: استخدام Docker (الأسهل)
+docker-compose up frontend-desktop
+```
+
+**على Linux/macOS:**
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
+```
+
 ### التثبيت
 
 ```bash
-# تثبيت المكتبات
+# 1. تثبيت مكتبات Node.js
 npm install
 
-# تشغيل وضع التطوير
+# 2. تشغيل وضع التطوير (سيقوم ببناء Rust تلقائياً)
 npm run tauri:dev
 
-# بناء التطبيق
+# 3. بناء التطبيق للإنتاج
 npm run tauri:build
+```
+
+### إذا واجهت مشكلة في بناء Rust على Windows
+
+**الحل 1: Docker (الأسرع والأسهل)**
+```bash
+cd /home/user/duhatv/quran-modern-stack
+docker-compose up --build frontend-desktop
+```
+
+**الحل 2: استخدام WSL2**
+```powershell
+wsl --install
+# ثم افتح WSL وقم بتشغيل الأوامر داخل Linux
 ```
 
 ## 📁 هيكل المشروع
@@ -72,6 +104,9 @@ frontend-desktop/
 - [x] دعم RTL (من اليمين لليسار)
 - [x] الخطوط العربية
 - [x] TailwindCSS مع الألوان المخصصة
+- [x] تكامل Tauri مع Rust Backend
+- [x] نظام التحية التفاعلي (مثال على Tauri Commands)
+- [x] إعدادات النافذة المخصصة (1200×800)
 
 ### 🔄 قيد التطوير
 
@@ -95,10 +130,21 @@ frontend-desktop/
 ### `App.tsx`
 
 المكون الرئيسي الذي يحتوي على:
-- Header مع العنوان
+- Header مع العنوان الذهبي
+- نظام التحية التفاعلي (يستخدم Tauri Commands للتواصل مع Rust)
+  - حقل إدخال الاسم
+  - زر التحية
+  - عرض الرسالة من Rust Backend
+- عداد React التجريبي
 - عرض الإحصائيات (114 سورة، 6236 آية، 77432 كلمة)
-- بطاقات الميزات
+- بطاقات الميزات الأربعة
 - Footer مع آية قرآنية
+
+### `src-tauri/src/main.rs`
+
+كود Rust الخلفي الذي يحتوي على:
+- دالة `greet` - ترجع رسالة ترحيب بالعربية
+- إعداد Tauri Builder مع command handlers
 
 ### الخطط المستقبلية
 
