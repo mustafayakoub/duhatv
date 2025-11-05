@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 القرآن الكريم - Quran Clean</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- الشريط العلوي Header -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="app-title">📖 القرآن الكريم</h1>
+
+                <div class="header-actions">
+                    <!-- زر البحث -->
+                    <button class="icon-btn" id="searchBtn" title="بحث">
+                        <span>🔍</span>
+                    </button>
+
+                    <!-- زر الإعدادات -->
+                    <button class="icon-btn" id="settingsBtn" title="الإعدادات">
+                        <span>⚙️</span>
+                    </button>
+
+                    <!-- زر المعلومات -->
+                    <button class="icon-btn" id="infoBtn" title="معلومات">
+                        <span>ℹ️</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- شريط الخيارات Controls Bar -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div class="controls-bar">
+        <div class="container">
+            <div class="controls-content">
+                <!-- اختيار السورة -->
+                <div class="control-group">
+                    <label for="surahSelect">السورة</label>
+                    <select id="surahSelect" class="select-field">
+                        <option value="">جاري التحميل...</option>
+                    </select>
+                </div>
+
+                <!-- اختيار النمط/القراءة -->
+                <div class="control-group">
+                    <label for="textTypeSelect">النمط/القراءة</label>
+                    <select id="textTypeSelect" class="select-field">
+                        <optgroup label="الرسم الأساسي">
+                            <option value="text_awwal">الرسم الأول</option>
+                            <option value="text_uthmani" selected>الرسم العثماني الكامل</option>
+                            <option value="text_uthmani_min">الرسم العثماني المبسط</option>
+                        </optgroup>
+                        <optgroup label="القراءات القرآنية">
+                            <option value="text_hafs">قراءة حفص</option>
+                            <option value="text_warsh">قراءة ورش</option>
+                            <option value="text_qaloun">قراءة قالون</option>
+                            <option value="text_douri">قراءة الدوري</option>
+                            <option value="text_shuba">قراءة شعبة</option>
+                            <option value="text_sousi">قراءة السوسي</option>
+                        </optgroup>
+                        <optgroup label="أنماط أخرى">
+                            <option value="text_amiry">أميري مشكل</option>
+                            <option value="text_imlaei">إملائي مشكل</option>
+                            <option value="text_imlaei_mini">إملائي مبسط</option>
+                            <option value="text_imlaei_plain">إملائي بدون تشكيل</option>
+                            <option value="text_simple_fasel">مبسط مع الفاصلة</option>
+                            <option value="text_simple_tam">مبسط تام</option>
+                            <option value="text_ajami">عجمي</option>
+                            <option value="text_latin">لاتيني (Transliteration)</option>
+                            <option value="text_tajweed">مع أحكام التجويد</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- اختيار الخط -->
+                <div class="control-group">
+                    <label for="fontSelect">الخط</label>
+                    <select id="fontSelect" class="select-field">
+                        <option value="UthmanicHafs_V22">عثماني حفص v22</option>
+                        <option value="Al Mushaf_pakistan">مصحف باكستان</option>
+                        <option value="AlJalil_v01">الجليل</option>
+                        <option value="AlJalilDot_v01">الجليل منقط</option>
+                        <option value="KFGQPC-KufiExtV14">كوفي</option>
+                        <option value="Magreb_rabat">مغربي</option>
+                    </select>
+                </div>
+
+                <!-- حجم الخط -->
+                <div class="control-group">
+                    <label for="fontSizeRange">الحجم</label>
+                    <input type="range" id="fontSizeRange" min="18" max="48" value="28" class="range-field">
+                    <span id="fontSizeLabel" class="size-label">28</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- المحتوى الرئيسي Main Content -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <main class="app-main">
+        <div class="container">
+            <!-- معلومات السورة -->
+            <div id="surahInfo" class="surah-info" style="display: none;">
+                <h2 id="surahName" class="surah-name"></h2>
+                <p id="surahDetails" class="surah-details"></p>
+            </div>
+
+            <!-- عرض الآيات -->
+            <div id="ayahsContainer" class="ayahs-container">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>اختر سورة لعرض الآيات...</p>
+                </div>
+            </div>
+
+            <!-- أزرار التنقل -->
+            <div id="navigation" class="navigation" style="display: none;">
+                <button id="prevSurahBtn" class="nav-btn nav-btn-prev">
+                    <span>←</span> السورة السابقة
+                </button>
+                <button id="nextSurahBtn" class="nav-btn nav-btn-next">
+                    السورة التالية <span>→</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Modal: البحث Search Modal -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔍 البحث في القرآن الكريم</h3>
+                <button class="close-btn" data-modal="searchModal">×</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- نوع البحث -->
+                <div class="form-group">
+                    <label>نوع البحث</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="searchType" value="text" checked>
+                            <span>بحث نصي</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="searchType" value="root">
+                            <span>بحث بالجذر</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="searchType" value="irab">
+                            <span>بحث بالإعراب</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="searchType" value="meaning">
+                            <span>بحث بالمعنى</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- حقل البحث -->
+                <div class="form-group">
+                    <input type="text" id="searchInput" class="search-input" placeholder="أدخل نص البحث...">
+                </div>
+
+                <!-- زر البحث -->
+                <button id="performSearchBtn" class="primary-btn">بحث</button>
+
+                <!-- نتائج البحث -->
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Modal: الإعدادات Settings Modal -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚙️ الإعدادات</h3>
+                <button class="close-btn" data-modal="settingsModal">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="settings-group">
+                    <h4>عرض الكلمات</h4>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showIrabCheckbox">
+                        <span>عرض الإعراب عند النقر على الكلمة</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showMeaningCheckbox">
+                        <span>عرض المعنى عند النقر على الكلمة</span>
+                    </label>
+                </div>
+
+                <div class="settings-group">
+                    <h4>الألوان</h4>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="darkModeCheckbox">
+                        <span>الوضع الليلي</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Modal: المعلومات Info Modal -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>ℹ️ معلومات التطبيق</h3>
+                <button class="close-btn" data-modal="infoModal">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="info-content">
+                    <h4>📖 Quran Clean - التطبيق القرآني النظيف</h4>
+                    <p>تطبيق بسيط وأنيق لقراءة القرآن الكريم</p>
+
+                    <div class="features-list">
+                        <h5>✨ الميزات:</h5>
+                        <ul>
+                            <li>18 قراءة ونمط قرآني</li>
+                            <li>16 خط قرآني</li>
+                            <li>بحث متقدم (نصي، جذور، إعراب، معاني)</li>
+                            <li>إعراب وصرف لكل كلمة</li>
+                            <li>معاني الكلمات</li>
+                            <li>واجهة أنيقة وسهلة</li>
+                        </ul>
+                    </div>
+
+                    <div class="stats" id="appStats">
+                        <p>جاري تحميل الإحصائيات...</p>
+                    </div>
+
+                    <p class="verse">
+                        "إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ"<br>
+                        <span style="font-size: 0.9em; opacity: 0.8;">(الإسراء: 9)</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Modal: تفاصيل الكلمة Word Details Modal -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="wordModal" class="modal">
+        <div class="modal-content modal-content-small">
+            <div class="modal-header">
+                <h3 id="wordModalTitle">تفاصيل الكلمة</h3>
+                <button class="close-btn" data-modal="wordModal">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div id="wordDetails" class="word-details-content">
+                    <!-- سيتم ملؤها من JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- الفوتر Footer -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <footer class="app-footer">
+        <div class="container">
+            <p>بُني بـ ❤️ باستخدام Python + Flask</p>
+        </div>
+    </footer>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- JavaScript -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
