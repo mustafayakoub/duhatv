@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بصائر الحديث النبوي الشريف</title>
+
+  <!-- External Libraries -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts for Arabic -->
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            golden: {
+              50: '#fefce8',
+              100: '#fef9c3',
+              200: '#fef08a',
+              300: '#fde047',
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+              700: '#a16207',
+              800: '#854d0e',
+              900: '#713f12',
+            },
+            bronze: {
+              50: '#faf8f5',
+              100: '#f5f0e8',
+              200: '#e8ddc8',
+              300: '#dcc9a8',
+              400: '#ccac7d',
+              500: '#b8956a',
+              600: '#9d7c53',
+              700: '#7d6342',
+              800: '#5e4a32',
+              900: '#3f3121',
+            }
+          },
+          fontFamily: {
+            arabic: ['Amiri', 'Scheherazade New', 'Traditional Arabic', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Amiri', 'Scheherazade New', serif;
+    }
+
+    .hadith-text {
+      line-height: 2.2;
+      text-align: justify;
+    }
+
+    .isnad {
+      background: linear-gradient(to left, #fef9c3, #fefce8);
+      border-right: 4px solid #eab308;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 0.5rem;
+    }
+
+    .matn {
+      background: linear-gradient(to left, #faf8f5, white);
+      border-right: 4px solid #b8956a;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 0.5rem;
+    }
+
+    .grade-sahih { background-color: #dcfce7; color: #166534; }
+    .grade-hasan { background-color: #dbeafe; color: #1e40af; }
+    .grade-daif { background-color: #fef3c7; color: #92400e; }
+    .grade-mawdu { background-color: #fee2e2; color: #991b1b; }
+
+    .scrollbar-golden::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .scrollbar-golden::-webkit-scrollbar-track {
+      background: #fef9c3;
+      border-radius: 4px;
+    }
+
+    .scrollbar-golden::-webkit-scrollbar-thumb {
+      background: #eab308;
+      border-radius: 4px;
+    }
+
+    .scrollbar-golden::-webkit-scrollbar-thumb:hover {
+      background: #ca8a04;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-golden-50 via-white to-bronze-50">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // ==================== البيانات ====================
+
+    // الكتب الستة وغيرها
+    const HADITH_BOOKS = [
+      {
+        id: 'bukhari',
+        nameAr: 'صحيح البخاري',
+        nameEn: 'Sahih al-Bukhari',
+        author: 'الإمام محمد بن إسماعيل البخاري',
+        totalHadith: 7563,
+        chapters: 97,
+        grade: 'أصح الكتب بعد كتاب الله',
+        color: 'golden'
+      },
+      {
+        id: 'muslim',
+        nameAr: 'صحيح مسلم',
+        nameEn: 'Sahih Muslim',
+        author: 'الإمام مسلم بن الحجاج النيسابوري',
+        totalHadith: 7190,
+        chapters: 56,
+        grade: 'من أصح الكتب',
+        color: 'bronze'
+      },
+      {
+        id: 'abudawud',
+        nameAr: 'سنن أبي داود',
+        nameEn: 'Sunan Abi Dawud',
+        author: 'الإمام أبو داود سليمان السجستاني',
+        totalHadith: 5274,
+        chapters: 43,
+        grade: 'من أمهات كتب السنة',
+        color: 'golden'
+      },
+      {
+        id: 'tirmidhi',
+        nameAr: 'جامع الترمذي',
+        nameEn: 'Jami` at-Tirmidhi',
+        author: 'الإمام محمد بن عيسى الترمذي',
+        totalHadith: 3956,
+        chapters: 46,
+        grade: 'من كتب السنن المعتمدة',
+        color: 'bronze'
+      },
+      {
+        id: 'nasai',
+        nameAr: 'سنن النسائي',
+        nameEn: "Sunan an-Nasa'i",
+        author: 'الإمام أحمد بن شعيب النسائي',
+        totalHadith: 5758,
+        chapters: 51,
+        grade: 'من أدق كتب السنن',
+        color: 'golden'
+      },
+      {
+        id: 'ibnmajah',
+        nameAr: 'سنن ابن ماجه',
+        nameEn: 'Sunan Ibn Majah',
+        author: 'الإمام محمد بن يزيد ابن ماجه',
+        totalHadith: 4341,
+        chapters: 37,
+        grade: 'من الكتب الستة المعتمدة',
+        color: 'bronze'
+      },
+      {
+        id: 'malik',
+        nameAr: 'موطأ الإمام مالك',
+        nameEn: 'Muwatta Malik',
+        author: 'الإمام مالك بن أنس',
+        totalHadith: 1720,
+        chapters: 61,
+        grade: 'من أقدم كتب الحديث',
+        color: 'golden'
+      },
+      {
+        id: 'ahmad',
+        nameAr: 'مسند الإمام أحمد',
+        nameEn: 'Musnad Ahmad',
+        author: 'الإمام أحمد بن حنبل',
+        totalHadith: 27647,
+        chapters: 0,
+        grade: 'أكبر المسانيد وأشهرها',
+        color: 'bronze'
+      },
+    ];
+
+    // التصنيف الموضوعي
+    const THEMATIC_CATEGORIES = [
+      { id: 'iman', nameAr: 'الإيمان', icon: '🕌', count: 856 },
+      { id: 'taharah', nameAr: 'الطهارة', icon: '💧', count: 642 },
+      { id: 'salah', nameAr: 'الصلاة', icon: '🤲', count: 1453 },
+      { id: 'zakah', nameAr: 'الزكاة', icon: '💰', count: 387 },
+      { id: 'sawm', nameAr: 'الصيام', icon: '🌙', count: 294 },
+      { id: 'hajj', nameAr: 'الحج', icon: '🕋', count: 521 },
+      { id: 'adab', nameAr: 'الآداب', icon: '🌟', count: 1876 },
+      { id: 'ahkam', nameAr: 'الأحكام', icon: '⚖️', count: 1243 },
+      { id: 'riqaq', nameAr: 'الرقائق', icon: '❤️', count: 734 },
+      { id: 'fitan', nameAr: 'الفتن', icon: '⚠️', count: 489 },
+    ];
+
+    // أحاديث نموذجية من صحيح البخاري
+    const SAMPLE_HADITHS = [
+      {
+        id: 1,
+        book: 'bukhari',
+        bookNumber: 1,
+        chapter: 'بدء الوحي',
+        chapterNumber: 1,
+        isnad: 'حدثنا الحميدي عبد الله بن الزبير قال حدثنا سفيان قال حدثنا يحيى بن سعيد الأنصاري قال أخبرني محمد بن إبراهيم التيمي أنه سمع علقمة بن وقاص الليثي يقول سمعت عمر بن الخطاب رضي الله عنه على المنبر قال سمعت رسول الله صلى الله عليه وسلم يقول',
+        matn: 'إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى، فمن كانت هجرته إلى الله ورسوله فهجرته إلى الله ورسوله، ومن كانت هجرته لدنيا يصيبها أو امرأة ينكحها فهجرته إلى ما هاجر إليه',
+        grade: 'صحيح',
+        gradeClass: 'grade-sahih',
+        narrator: 'عمر بن الخطاب',
+        theme: 'iman',
+        translation: {
+          en: 'Actions are judged by intentions, so each man will have what he intended.',
+          ur: 'اعمال کا دارومدار نیتوں پر ہے، اور ہر شخص کو وہی ملے گا جس کی اس نے نیت کی۔',
+        },
+        sharh: 'هذا الحديث أصل عظيم من أصول الدين، وعليه مدار الإسلام، وهو ميزان الأعمال الباطنة. قال الإمام الشافعي: هذا الحديث ثلث العلم. وقال الإمام أحمد: أصول الإسلام على ثلاثة أحاديث، وذكر منها حديث الأعمال بالنيات.',
+        topics: ['النية', 'الإخلاص', 'القصد', 'الهجرة'],
+      },
+      {
+        id: 2,
+        book: 'bukhari',
+        bookNumber: 2,
+        chapter: 'بدء الوحي',
+        chapterNumber: 1,
+        isnad: 'حدثنا عبد الله بن يوسف قال أخبرنا مالك عن هشام بن عروة عن أبيه عن عائشة أم المؤمنين رضي الله عنها',
+        matn: 'أن الحارث بن هشام رضي الله عنه سأل رسول الله صلى الله عليه وسلم فقال: يا رسول الله كيف يأتيك الوحي؟ فقال رسول الله صلى الله عليه وسلم: أحيانا يأتيني مثل صلصلة الجرس وهو أشده علي فيفصم عني وقد وعيت عنه ما قال، وأحيانا يتمثل لي الملك رجلا فيكلمني فأعي ما يقول',
+        grade: 'صحيح',
+        gradeClass: 'grade-sahih',
+        narrator: 'عائشة أم المؤمنين',
+        theme: 'iman',
+        translation: {
+          en: 'Sometimes revelation comes like the ringing of a bell, and that is the hardest for me.',
+          ur: 'کبھی وحی گھنٹی کی آواز کی طرح آتی ہے، اور یہ مجھ پر سب سے زیادہ مشکل ہے۔',
+        },
+        sharh: 'في هذا الحديث بيان كيفية نزول الوحي على النبي صلى الله عليه وسلم، وأنه كان يأتيه على أنواع مختلفة، منها ما هو أشد عليه من غيره.',
+        topics: ['الوحي', 'جبريل', 'النبوة'],
+      },
+      {
+        id: 8,
+        book: 'muslim',
+        bookNumber: 1,
+        chapter: 'الإيمان',
+        chapterNumber: 1,
+        isnad: 'حدثنا يحيى بن يحيى التميمي، وأبو بكر بن أبي شيبة، ومحمد بن العلاء الهمداني، واللفظ ليحيى قال يحيى: أخبرنا، وقال الآخران: حدثنا أبو معاوية، عن الأعمش، عن أبي صالح، عن أبي هريرة',
+        matn: 'قال: كان النبي صلى الله عليه وسلم بارزا يوما للناس، فأتاه جبريل فقال: ما الإيمان؟ قال: الإيمان أن تؤمن بالله وملائكته وكتبه وبلقائه ورسله وتؤمن بالبعث. قال: ما الإسلام؟ قال: الإسلام: أن تعبد الله ولا تشرك به شيئا، وتقيم الصلاة، وتؤدي الزكاة المفروضة، وتصوم رمضان. قال: ما الإحسان؟ قال: أن تعبد الله كأنك تراه، فإن لم تكن تراه فإنه يراك',
+        grade: 'صحيح',
+        gradeClass: 'grade-sahih',
+        narrator: 'أبو هريرة',
+        theme: 'iman',
+        translation: {
+          en: 'Faith is to believe in Allah, His angels, His books, His meeting, His messengers, and the resurrection.',
+          ur: 'ایمان یہ ہے کہ تم اللہ پر، اس کے فرشتوں پر، اس کی کتابوں پر، اس کی ملاقات پر، اس کے رسولوں پر اور دوبارہ اٹھائے جانے پر ایمان لاؤ۔',
+        },
+        sharh: 'هذا حديث جبريل المشهور، وهو من أعظم أحاديث الإسلام، جمع فيه النبي صلى الله عليه وسلم أصول الدين الثلاثة: الإسلام والإيمان والإحسان.',
+        topics: ['الإيمان', 'الإسلام', 'الإحسان', 'جبريل', 'أركان الإيمان'],
+      },
+      {
+        id: 15,
+        book: 'bukhari',
+        bookNumber: 6008,
+        chapter: 'الأدب',
+        chapterNumber: 78,
+        isnad: 'حدثنا آدم حدثنا شعبة حدثنا عبد الله بن أبي السفر وإسماعيل عن الشعبي عن النعمان بن بشير',
+        matn: 'قال النبي صلى الله عليه وسلم: مثل المؤمنين في توادهم وتراحمهم وتعاطفهم مثل الجسد إذا اشتكى منه عضو تداعى له سائر الجسد بالسهر والحمى',
+        grade: 'صحيح',
+        gradeClass: 'grade-sahih',
+        narrator: 'النعمان بن بشير',
+        theme: 'adab',
+        translation: {
+          en: 'The believers in their mutual kindness, compassion, and sympathy are just like one body. When one of the limbs suffers, the whole body responds with wakefulness and fever.',
+          ur: 'مومنین اپنی باہمی محبت، رحمت اور ہمدردی میں ایک جسم کی طرح ہیں۔ جب اس کا ایک عضو تکلیف میں ہو تو سارا جسم بیداری اور بخار سے رد عمل ظاہر کرتا ہے۔',
+        },
+        sharh: 'هذا الحديث يبين عظمة الرابطة الإيمانية بين المسلمين، وأنهم كالجسد الواحد، يتأثر بعضهم ببعض، ويشعر بعضهم بآلام بعض.',
+        topics: ['الأخوة', 'التراحم', 'التعاطف', 'المحبة'],
+      },
+      {
+        id: 20,
+        book: 'muslim',
+        bookNumber: 2699,
+        chapter: 'البر والصلة',
+        chapterNumber: 45,
+        isnad: 'حدثنا أبو بكر بن أبي شيبة وأبو كريب قالا: حدثنا أبو معاوية عن الأعمش عن أبي صالح عن أبي هريرة',
+        matn: 'قال: قال رسول الله صلى الله عليه وسلم: من كان يؤمن بالله واليوم الآخر فليقل خيرا أو ليصمت، ومن كان يؤمن بالله واليوم الآخر فليكرم جاره، ومن كان يؤمن بالله واليوم الآخر فليكرم ضيفه',
+        grade: 'صحيح',
+        gradeClass: 'grade-sahih',
+        narrator: 'أبو هريرة',
+        theme: 'adab',
+        translation: {
+          en: 'Whoever believes in Allah and the Last Day should speak good or remain silent. And whoever believes in Allah and the Last Day should honor his neighbor. And whoever believes in Allah and the Last Day should honor his guest.',
+          ur: 'جو اللہ اور آخرت کے دن پر ایمان رکھتا ہے وہ اچھی بات کہے یا خاموش رہے۔ اور جو اللہ اور آخرت کے دن پر ایمان رکھتا ہے وہ اپنے پڑوسی کا اکرام کرے۔ اور جو اللہ اور آخرت کے دن پر ایمان رکھتا ہے وہ اپنے مہمان کا اکرام کرے۔',
+        },
+        sharh: 'جمع النبي صلى الله عليه وسلم في هذا الحديث ثلاثة آداب عظيمة من آداب الإسلام: حفظ اللسان، وإكرام الجار، وإكرام الضيف.',
+        topics: ['الكلام', 'حسن الجوار', 'الضيافة', 'الأدب'],
+      },
+    ];
+
+    // ==================== المكونات ====================
+
+    // المكون الرئيسي
+    function HadithApp() {
+      const [currentView, setCurrentView] = useState('books'); // books, hadith, search, thematic
+      const [selectedBook, setSelectedBook] = useState(null);
+      const [selectedHadith, setSelectedHadith] = useState(null);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [searchType, setSearchType] = useState('matn'); // matn, narrator, theme, number
+      const [showSettings, setShowSettings] = useState(false);
+      const [fontSize, setFontSize] = useState(22);
+      const [showTranslation, setShowTranslation] = useState(true);
+      const [showSharh, setShowSharh] = useState(false);
+      const [showIsnad, setShowIsnad] = useState(true);
+      const [selectedTheme, setSelectedTheme] = useState(null);
+
+      // البحث المفلتر
+      const filteredHadiths = useMemo(() => {
+        if (!searchQuery) return SAMPLE_HADITHS;
+
+        const query = searchQuery.toLowerCase().trim();
+
+        return SAMPLE_HADITHS.filter(hadith => {
+          switch (searchType) {
+            case 'matn':
+              return hadith.matn.includes(searchQuery) || hadith.matn.toLowerCase().includes(query);
+            case 'narrator':
+              return hadith.narrator.includes(searchQuery) || hadith.narrator.toLowerCase().includes(query);
+            case 'theme':
+              return hadith.topics.some(t => t.includes(searchQuery));
+            case 'number':
+              return hadith.bookNumber.toString() === query;
+            default:
+              return true;
+          }
+        });
+      }, [searchQuery, searchType]);
+
+      // عرض التفاصيل
+      const renderHadithDetail = (hadith) => (
+        <div className="p-6 space-y-6">
+          {/* رأس الحديث */}
+          <div className="bg-gradient-to-r from-golden-100 to-bronze-100 p-4 rounded-xl border-2 border-golden-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-golden-800">
+                  {HADITH_BOOKS.find(b => b.id === hadith.book)?.nameAr}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {hadith.chapter} • رقم الحديث: {hadith.bookNumber}
+                </p>
+              </div>
+              <span className={`px-4 py-2 rounded-lg font-bold text-sm ${hadith.gradeClass}`}>
+                {hadith.grade}
+              </span>
+            </div>
+          </div>
+
+          {/* السند */}
+          {showIsnad && (
+            <div className="isnad">
+              <h4 className="font-bold text-golden-800 mb-2 flex items-center gap-2">
+                <span>🔗</span> السند
+              </h4>
+              <p className="text-base leading-relaxed" style={{ fontSize: `${fontSize - 2}px` }}>
+                {hadith.isnad}
+              </p>
+            </div>
+          )}
+
+          {/* المتن */}
+          <div className="matn">
+            <h4 className="font-bold text-bronze-800 mb-3 flex items-center gap-2">
+              <span>📜</span> المتن
+            </h4>
+            <p className="hadith-text text-gray-900" style={{ fontSize: `${fontSize}px` }}>
+              {hadith.matn}
+            </p>
+          </div>
+
+          {/* الترجمة */}
+          {showTranslation && (
+            <div className="bg-blue-50 p-4 rounded-lg border-r-4 border-blue-400">
+              <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                <span>🌐</span> الترجمة الإنجليزية
+              </h4>
+              <p className="text-gray-700 text-base leading-relaxed" dir="ltr" style={{ fontSize: `${fontSize - 4}px` }}>
+                {hadith.translation.en}
+              </p>
+              <h4 className="font-bold text-blue-800 mb-2 mt-4 flex items-center gap-2">
+                <span>🌐</span> الترجمة الأردية
+              </h4>
+              <p className="text-gray-700 text-base leading-relaxed" dir="rtl" style={{ fontSize: `${fontSize - 4}px` }}>
+                {hadith.translation.ur}
+              </p>
+            </div>
+          )}
+
+          {/* الشرح */}
+          {showSharh && (
+            <div className="bg-green-50 p-4 rounded-lg border-r-4 border-green-400">
+              <h4 className="font-bold text-green-800 mb-2 flex items-center gap-2">
+                <span>💡</span> الشرح
+              </h4>
+              <p className="text-gray-700 text-base leading-relaxed" style={{ fontSize: `${fontSize - 2}px` }}>
+                {hadith.sharh}
+              </p>
+            </div>
+          )}
+
+          {/* المواضيع */}
+          <div>
+            <h4 className="font-bold text-gray-700 mb-2 flex items-center gap-2">
+              <span>🏷️</span> المواضيع المتعلقة
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {hadith.topics.map((topic, idx) => (
+                <span key={idx} className="px-3 py-1 bg-golden-100 text-golden-800 rounded-full text-sm">
+                  {topic}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* الشريط العلوي */}
+          <header className="bg-gradient-to-r from-golden-500 to-bronze-500 text-white shadow-lg">
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-4xl">📿</span>
+                  <div>
+                    <h1 className="text-2xl font-bold">بصائر الحديث النبوي الشريف</h1>
+                    <p className="text-sm opacity-90">موسوعة الأحاديث الشريفة الشاملة</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <span>⚙️</span> الإعدادات
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* القائمة الأفقية */}
+          <nav className="bg-white border-b-2 border-golden-200 shadow-sm">
+            <div className="container mx-auto px-4">
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setCurrentView('books')}
+                  className={`px-6 py-3 font-bold transition-all ${
+                    currentView === 'books'
+                      ? 'bg-golden-100 text-golden-800 border-b-4 border-golden-500'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  📚 الكتب
+                </button>
+                <button
+                  onClick={() => setCurrentView('thematic')}
+                  className={`px-6 py-3 font-bold transition-all ${
+                    currentView === 'thematic'
+                      ? 'bg-golden-100 text-golden-800 border-b-4 border-golden-500'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  🗂️ التصنيف الموضوعي
+                </button>
+                <button
+                  onClick={() => setCurrentView('search')}
+                  className={`px-6 py-3 font-bold transition-all ${
+                    currentView === 'search'
+                      ? 'bg-golden-100 text-golden-800 border-b-4 border-golden-500'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  🔍 البحث الذكي
+                </button>
+                <button
+                  onClick={() => setCurrentView('stats')}
+                  className={`px-6 py-3 font-bold transition-all ${
+                    currentView === 'stats'
+                      ? 'bg-golden-100 text-golden-800 border-b-4 border-golden-500'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  📊 الإحصائيات
+                </button>
+              </div>
+            </div>
+          </nav>
+
+          {/* المحتوى الرئيسي */}
+          <main className="flex-1 overflow-y-auto scrollbar-golden">
+            <div className="container mx-auto px-4 py-6">
+              {/* عرض الكتب */}
+              {currentView === 'books' && !selectedBook && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {HADITH_BOOKS.map(book => (
+                    <div
+                      key={book.id}
+                      onClick={() => setSelectedBook(book)}
+                      className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all cursor-pointer border-2 border-transparent hover:border-golden-400 p-6"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-gray-800 mb-1">{book.nameAr}</h3>
+                          <p className="text-sm text-gray-500">{book.nameEn}</p>
+                        </div>
+                        <span className={`text-3xl ${book.color === 'golden' ? 'filter hue-rotate-15' : ''}`}>
+                          📖
+                        </span>
+                      </div>
+                      <p className="text-gray-700 text-sm mb-3">{book.author}</p>
+                      <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+                        <span>📊 {book.totalHadith.toLocaleString('ar')} حديث</span>
+                        {book.chapters > 0 && <span>📑 {book.chapters} باب</span>}
+                      </div>
+                      <div className={`text-xs px-3 py-2 rounded-lg ${
+                        book.color === 'golden' ? 'bg-golden-100 text-golden-800' : 'bg-bronze-100 text-bronze-800'
+                      }`}>
+                        {book.grade}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* عرض أحاديث الكتاب المختار */}
+              {currentView === 'books' && selectedBook && !selectedHadith && (
+                <div>
+                  <div className="mb-6 flex items-center justify-between">
+                    <button
+                      onClick={() => setSelectedBook(null)}
+                      className="flex items-center gap-2 text-golden-700 hover:text-golden-900"
+                    >
+                      ← الرجوع للكتب
+                    </button>
+                    <div className="text-center">
+                      <h2 className="text-2xl font-bold text-golden-800">{selectedBook.nameAr}</h2>
+                      <p className="text-gray-600">{selectedBook.author}</p>
+                    </div>
+                    <div></div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {SAMPLE_HADITHS.filter(h => h.book === selectedBook.id).map(hadith => (
+                      <div
+                        key={hadith.id}
+                        onClick={() => setSelectedHadith(hadith)}
+                        className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer border-2 border-transparent hover:border-golden-400 p-5"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <span className={`px-3 py-1 rounded-lg text-xs font-bold ${hadith.gradeClass}`}>
+                            {hadith.grade}
+                          </span>
+                          <span className="text-sm text-gray-500">رقم {hadith.bookNumber}</span>
+                        </div>
+                        <p className="text-gray-800 leading-relaxed mb-3" style={{ fontSize: `${fontSize - 2}px` }}>
+                          {hadith.matn.substring(0, 200)}...
+                        </p>
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <span>👤 {hadith.narrator}</span>
+                          <span>📂 {hadith.chapter}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* عرض تفاصيل الحديث */}
+              {selectedHadith && (
+                <div className="max-w-4xl mx-auto">
+                  <div className="mb-4">
+                    <button
+                      onClick={() => setSelectedHadith(null)}
+                      className="flex items-center gap-2 text-golden-700 hover:text-golden-900"
+                    >
+                      ← الرجوع
+                    </button>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg">
+                    {renderHadithDetail(selectedHadith)}
+                  </div>
+                </div>
+              )}
+
+              {/* التصنيف الموضوعي */}
+              {currentView === 'thematic' && !selectedTheme && (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {THEMATIC_CATEGORIES.map(cat => (
+                    <div
+                      key={cat.id}
+                      onClick={() => setSelectedTheme(cat)}
+                      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer p-6 text-center border-2 border-transparent hover:border-golden-400"
+                    >
+                      <div className="text-5xl mb-3">{cat.icon}</div>
+                      <h3 className="font-bold text-gray-800 mb-2">{cat.nameAr}</h3>
+                      <p className="text-sm text-gray-600">{cat.count.toLocaleString('ar')} حديث</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* أحاديث الموضوع المختار */}
+              {currentView === 'thematic' && selectedTheme && (
+                <div>
+                  <div className="mb-6 flex items-center justify-between">
+                    <button
+                      onClick={() => setSelectedTheme(null)}
+                      className="flex items-center gap-2 text-golden-700 hover:text-golden-900"
+                    >
+                      ← الرجوع للمواضيع
+                    </button>
+                    <div className="text-center">
+                      <div className="text-5xl mb-2">{selectedTheme.icon}</div>
+                      <h2 className="text-2xl font-bold text-golden-800">{selectedTheme.nameAr}</h2>
+                      <p className="text-gray-600">{selectedTheme.count.toLocaleString('ar')} حديث</p>
+                    </div>
+                    <div></div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {SAMPLE_HADITHS.filter(h => h.theme === selectedTheme.id).map(hadith => (
+                      <div
+                        key={hadith.id}
+                        onClick={() => setSelectedHadith(hadith)}
+                        className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer border-2 border-transparent hover:border-golden-400 p-5"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <span className={`px-3 py-1 rounded-lg text-xs font-bold ${hadith.gradeClass}`}>
+                              {hadith.grade}
+                            </span>
+                            <span className="mr-2 text-sm text-gray-600">
+                              {HADITH_BOOKS.find(b => b.id === hadith.book)?.nameAr}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-500">رقم {hadith.bookNumber}</span>
+                        </div>
+                        <p className="text-gray-800 leading-relaxed mb-3" style={{ fontSize: `${fontSize - 2}px` }}>
+                          {hadith.matn.substring(0, 200)}...
+                        </p>
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <span>👤 {hadith.narrator}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* البحث */}
+              {currentView === 'search' && (
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h2 className="text-2xl font-bold text-golden-800 mb-4">🔍 البحث الذكي في الأحاديث</h2>
+
+                    {/* نوع البحث */}
+                    <div className="flex gap-2 mb-4 flex-wrap">
+                      <button
+                        onClick={() => setSearchType('matn')}
+                        className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                          searchType === 'matn' ? 'bg-golden-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        البحث في المتن
+                      </button>
+                      <button
+                        onClick={() => setSearchType('narrator')}
+                        className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                          searchType === 'narrator' ? 'bg-golden-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        البحث في الراوي
+                      </button>
+                      <button
+                        onClick={() => setSearchType('theme')}
+                        className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                          searchType === 'theme' ? 'bg-golden-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        البحث الموضوعي
+                      </button>
+                      <button
+                        onClick={() => setSearchType('number')}
+                        className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                          searchType === 'number' ? 'bg-golden-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        البحث برقم الحديث
+                      </button>
+                    </div>
+
+                    {/* صندوق البحث */}
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={
+                        searchType === 'matn' ? 'ابحث في متن الحديث...' :
+                        searchType === 'narrator' ? 'ابحث عن راوي...' :
+                        searchType === 'theme' ? 'ابحث عن موضوع...' :
+                        'أدخل رقم الحديث...'
+                      }
+                      className="w-full px-4 py-3 border-2 border-golden-300 rounded-lg focus:border-golden-500 focus:outline-none text-lg"
+                    />
+
+                    {/* عدد النتائج */}
+                    <p className="text-sm text-gray-600 mt-3">
+                      {searchQuery ? `تم العثور على ${filteredHadiths.length.toLocaleString('ar')} حديث` : 'أدخل كلمة البحث'}
+                    </p>
+                  </div>
+
+                  {/* نتائج البحث */}
+                  <div className="space-y-4">
+                    {filteredHadiths.map(hadith => (
+                      <div
+                        key={hadith.id}
+                        onClick={() => setSelectedHadith(hadith)}
+                        className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer border-2 border-transparent hover:border-golden-400 p-5"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <span className={`px-3 py-1 rounded-lg text-xs font-bold ${hadith.gradeClass}`}>
+                              {hadith.grade}
+                            </span>
+                            <span className="mr-2 text-sm text-gray-600">
+                              {HADITH_BOOKS.find(b => b.id === hadith.book)?.nameAr} • رقم {hadith.bookNumber}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-gray-800 leading-relaxed mb-3" style={{ fontSize: `${fontSize - 2}px` }}>
+                          {hadith.matn.substring(0, 200)}...
+                        </p>
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <span>👤 {hadith.narrator}</span>
+                          <span>📂 {hadith.chapter}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* الإحصائيات */}
+              {currentView === 'stats' && (
+                <div className="max-w-6xl mx-auto">
+                  <h2 className="text-3xl font-bold text-golden-800 mb-6 text-center">📊 إحصائيات الأحاديث النبوية</h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-gradient-to-br from-golden-100 to-golden-50 rounded-xl shadow-lg p-6 text-center border-2 border-golden-300">
+                      <div className="text-5xl mb-3">📚</div>
+                      <div className="text-4xl font-bold text-golden-800 mb-2">
+                        {HADITH_BOOKS.length}
+                      </div>
+                      <div className="text-gray-700">كتاب حديث</div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-bronze-100 to-bronze-50 rounded-xl shadow-lg p-6 text-center border-2 border-bronze-300">
+                      <div className="text-5xl mb-3">📖</div>
+                      <div className="text-4xl font-bold text-bronze-800 mb-2">
+                        {HADITH_BOOKS.reduce((sum, b) => sum + b.totalHadith, 0).toLocaleString('ar')}
+                      </div>
+                      <div className="text-gray-700">حديث نبوي</div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-green-100 to-green-50 rounded-xl shadow-lg p-6 text-center border-2 border-green-300">
+                      <div className="text-5xl mb-3">🗂️</div>
+                      <div className="text-4xl font-bold text-green-800 mb-2">
+                        {THEMATIC_CATEGORIES.length}
+                      </div>
+                      <div className="text-gray-700">تصنيف موضوعي</div>
+                    </div>
+                  </div>
+
+                  {/* تفاصيل الكتب */}
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">📊 تفاصيل كتب الحديث</h3>
+                    <div className="space-y-3">
+                      {HADITH_BOOKS.map(book => (
+                        <div key={book.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-golden-50 transition-colors">
+                          <div className="flex-1">
+                            <span className="font-bold text-gray-800">{book.nameAr}</span>
+                            <span className="text-sm text-gray-600 mr-2">- {book.author}</span>
+                          </div>
+                          <div className="flex gap-4 text-sm">
+                            <span className="text-gray-700">{book.totalHadith.toLocaleString('ar')} حديث</span>
+                            {book.chapters > 0 && <span className="text-gray-600">{book.chapters} باب</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </main>
+
+          {/* لوحة الإعدادات */}
+          {showSettings && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="bg-gradient-to-r from-golden-500 to-bronze-500 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+                  <h2 className="text-2xl font-bold text-white">⚙️ إعدادات التطبيق</h2>
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="p-6 space-y-6">
+                  {/* حجم الخط */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      حجم الخط: {fontSize}px
+                    </label>
+                    <input
+                      type="range"
+                      min="16"
+                      max="36"
+                      value={fontSize}
+                      onChange={(e) => setFontSize(parseInt(e.target.value))}
+                      className="w-full h-2 bg-golden-200 rounded-lg appearance-none cursor-pointer accent-golden-500"
+                    />
+                  </div>
+
+                  {/* خيارات العرض */}
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showIsnad}
+                        onChange={(e) => setShowIsnad(e.target.checked)}
+                        className="w-5 h-5 text-golden-500 rounded focus:ring-golden-500"
+                      />
+                      <div className="flex-1">
+                        <div className="font-bold text-gray-800">عرض السند</div>
+                        <div className="text-sm text-gray-600">إظهار سلسلة الرواة للحديث</div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showTranslation}
+                        onChange={(e) => setShowTranslation(e.target.checked)}
+                        className="w-5 h-5 text-golden-500 rounded focus:ring-golden-500"
+                      />
+                      <div className="flex-1">
+                        <div className="font-bold text-gray-800">عرض الترجمة</div>
+                        <div className="text-sm text-gray-600">إظهار ترجمة الحديث بالإنجليزية والأردية</div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showSharh}
+                        onChange={(e) => setShowSharh(e.target.checked)}
+                        className="w-5 h-5 text-golden-500 rounded focus:ring-golden-500"
+                      />
+                      <div className="flex-1">
+                        <div className="font-bold text-gray-800">عرض الشرح</div>
+                        <div className="text-sm text-gray-600">إظهار شرح العلماء للحديث</div>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* الإحصائيات */}
+                  <div className="bg-gradient-to-br from-golden-50 to-bronze-50 p-4 rounded-lg border-2 border-golden-200">
+                    <h3 className="font-bold text-golden-800 mb-3">📊 إحصائيات التطبيق</h3>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="text-gray-600">عدد الكتب</div>
+                        <div className="text-2xl font-bold text-golden-800">{HADITH_BOOKS.length}</div>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="text-gray-600">إجمالي الأحاديث</div>
+                        <div className="text-2xl font-bold text-golden-800">
+                          {(HADITH_BOOKS.reduce((sum, b) => sum + b.totalHadith, 0) / 1000).toFixed(0)}K+
+                        </div>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="text-gray-600">التصنيفات</div>
+                        <div className="text-2xl font-bold text-golden-800">{THEMATIC_CATEGORIES.length}</div>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="text-gray-600">الأحاديث المعروضة</div>
+                        <div className="text-2xl font-bold text-golden-800">{SAMPLE_HADITHS.length}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t-2 border-golden-200 px-6 py-4 flex justify-end bg-gray-50 rounded-b-2xl">
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    className="px-6 py-2 bg-golden-500 hover:bg-golden-600 text-white rounded-lg font-bold transition-colors"
+                  >
+                    حفظ وإغلاق
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* الشريط السفلي */}
+          <footer className="bg-gradient-to-r from-golden-500 to-bronze-500 text-white py-3">
+            <div className="container mx-auto px-4 text-center text-sm">
+              <p>بصائر الحديث النبوي الشريف • {HADITH_BOOKS.reduce((sum, b) => sum + b.totalHadith, 0).toLocaleString('ar')}+ حديث نبوي شريف</p>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    // تشغيل التطبيق
+    ReactDOM.render(<HadithApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>
